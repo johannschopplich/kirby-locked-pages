@@ -29,7 +29,7 @@ private static $installed = array (
     'aliases' => 
     array (
     ),
-    'reference' => '4902d479cf63e77990967a183df6d225519f4728',
+    'reference' => '0e04c09c986ef0bf65f2839294ccd284664cb1bb',
     'name' => 'johannschopplich/kirby-locked-pages',
   ),
   'versions' => 
@@ -50,7 +50,7 @@ private static $installed = array (
       'aliases' => 
       array (
       ),
-      'reference' => '4902d479cf63e77990967a183df6d225519f4728',
+      'reference' => '0e04c09c986ef0bf65f2839294ccd284664cb1bb',
     ),
   ),
 );
