@@ -46,6 +46,6 @@
             "install-path": "../getkirby/composer-installer"
         }
     ],
-    "dev": false,
+    "dev": true,
     "dev-package-names": []
 }
