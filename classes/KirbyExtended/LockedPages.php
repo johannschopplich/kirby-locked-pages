@@ -4,7 +4,7 @@ namespace KirbyExtended;
 
 use Kirby\Cms\Page;
 
-class LockedPage
+class LockedPages
 {
     public static function isLocked(?Page $page): bool
     {
@@ -26,7 +26,7 @@ class LockedPage
 
     public static function find(Page $page): ?Page
     {
-        if ($page->lockedPageEnabled()->toBool()) {
+        if ($page->lockedPagesEnable()->exists() && $page->lockedPagesEnable()->toBool()) {
             return $page;
         }
 

@@ -1,6 +1,6 @@
 type: group
 fields:
-  lockedPageEnabled:
+  lockedPagesEnable:
     type: toggle
     label:
       en: Page Protection
@@ -8,7 +8,7 @@ fields:
     text:
       en: Password-protect this page?
       de: Seite mit Passwort schützen?
-  lockedPagePassword:
+  lockedPagesPassword:
     label:
       en: Password
       de: Passwort
@@ -16,4 +16,4 @@ fields:
     icon: lock
     required: true
     when:
-      lockedPageEnabled: true
+      lockedPagesEnable: true

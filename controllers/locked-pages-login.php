@@ -1,11 +1,12 @@
 <?php
 
-use KirbyExtended\LockedPage;
+use KirbyExtended\LockedPages;
 
 return function ($kirby) {
     $id = get('redirect');
     $targetPage = page($id);
-    $protectedPage = LockedPage::find($targetPage);
+
+    $protectedPage = LockedPages::find($targetPage);
     if (!$protectedPage) {
         go($id);
     }
@@ -23,12 +24,12 @@ return function ($kirby) {
         ];
     }
 
-    if ($protectedPage->lockedPagePassword()->value() !== get('password')) {
+    if ($protectedPage->lockedPagesPassword()->value() !== get('password')) {
         return [
             'error' => option('kirby-extended.locked-pages.error.password', 'The password is incorrect')
         ];
     }
 
-    kirby()->session()->set("locked-pages.access.{$protectedPage->id()}", true);
+    $kirby->session()->set("locked-pages.access.{$protectedPage->id()}", true);
     go($id);
 };
