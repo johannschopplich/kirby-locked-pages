@@ -4,7 +4,7 @@ namespace KirbyExtended;
 
 use Kirby\Cms\Page;
 
-class LockedPages
+class LockedPage
 {
     public static function isLocked(?Page $page): bool
     {
@@ -12,7 +12,7 @@ class LockedPages
             return false;
         }
 
-        $protectedPage = static::findLockedPage($page);
+        $protectedPage = static::find($page);
         if (!$protectedPage) {
             return false;
         }
@@ -24,14 +24,14 @@ class LockedPages
         return true;
     }
 
-    public static function findLockedPage(Page $page): ?Page
+    public static function find(Page $page): ?Page
     {
         if ($page->lockedPageEnabled()->toBool()) {
             return $page;
         }
 
         if ($parent = $page->parent()) {
-            return static::findLockedPage($parent);
+            return static::find($parent);
         }
 
         return null;

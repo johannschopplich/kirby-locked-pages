@@ -4,13 +4,13 @@
 
 use Kirby\Cms\App as Kirby;
 use Kirby\Cms\Page;
-use KirbyExtended\LockedPages;
+use KirbyExtended\LockedPage;
 
 Kirby::plugin('johannschopplich/kirby-locked-pages', [
     'hooks' => [
         'route:after' => function ($route, $path, $method, $result, $final) {
             if ($route->env() !== 'site') return;
-            if (!LockedPages::isLocked($result)) return;
+            if (!LockedPage::isLocked($result)) return;
 
             $path = option('kirby-extended.locked-pages.slug', 'locked');
             $options = [

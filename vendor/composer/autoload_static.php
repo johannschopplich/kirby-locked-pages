@@ -27,7 +27,7 @@ class ComposerStaticInitc3386789d5fb7c2ab0303e685ea3eb75
 
     public static $classMap = array (
         'Composer\\InstalledVersions' => __DIR__ . '/..' . '/composer/InstalledVersions.php',
-        'KirbyExtended\\LockedPages' => __DIR__ . '/../..' . '/classes/KirbyExtended/LockedPages.php',
+        'KirbyExtended\\LockedPage' => __DIR__ . '/../..' . '/classes/KirbyExtended/LockedPage.php',
         'Kirby\\ComposerInstaller\\CmsInstaller' => __DIR__ . '/..' . '/getkirby/composer-installer/src/ComposerInstaller/CmsInstaller.php',
         'Kirby\\ComposerInstaller\\Installer' => __DIR__ . '/..' . '/getkirby/composer-installer/src/ComposerInstaller/Installer.php',
         'Kirby\\ComposerInstaller\\Plugin' => __DIR__ . '/..' . '/getkirby/composer-installer/src/ComposerInstaller/Plugin.php',

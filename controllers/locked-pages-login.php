@@ -1,11 +1,11 @@
 <?php
 
-use KirbyExtended\LockedPages;
+use KirbyExtended\LockedPage;
 
 return function ($kirby) {
     $id = get('redirect');
-    $redirectPage = page($id);
-    $protectedPage = LockedPages::findLockedPage($redirectPage);
+    $targetPage = page($id);
+    $protectedPage = LockedPage::find($targetPage);
     if (!$protectedPage) {
         go($id);
     }
