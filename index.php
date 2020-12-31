@@ -9,7 +9,8 @@ use KirbyExtended\LockedPages;
 Kirby::plugin('johannschopplich/kirby-locked-pages', [
     'hooks' => [
         'route:after' => function ($route, $path, $method, $result, $final) {
-            if ($route->env() !== 'site') return;
+            if ($final !== true) return;
+            if (!empty($result)) return;
             if (!LockedPages::isLocked($result)) return;
 
             $path = option('kirby-extended.locked-pages.slug', 'locked');
