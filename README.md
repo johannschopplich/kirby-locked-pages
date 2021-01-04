@@ -75,10 +75,7 @@ Once you've defined a custom template, Kirby will automatically use the one you'
 To give an example for your `config.php`:
 
 ```php
-<?php
-
 return [
-    // …
     'kirby-extended.locked-pages' => [
         'slug' => 'geschuetzt',
         'title' => 'Geschützte Seite',
@@ -89,6 +86,10 @@ return [
     ]
 ]
 ```
+
+## Credits
+
+- Inspired by [kirby-securedpages](https://github.com/kerli81/kirby-securedpages)
 
 ## License
 
