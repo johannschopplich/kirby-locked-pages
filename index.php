@@ -10,7 +10,7 @@ Kirby::plugin('johannschopplich/kirby-locked-pages', [
     'hooks' => [
         'route:after' => function ($route, $path, $method, $result, $final) {
             if (!$final) return;
-            if (!empty($result)) return;
+            if (!is_a($result, Page::class)) return;
             if (!LockedPages::isLocked($result)) return;
 
             $options = [
