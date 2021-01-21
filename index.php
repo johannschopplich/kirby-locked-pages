@@ -25,6 +25,10 @@ Kirby::plugin('johannschopplich/kirby-locked-pages', [
             'pattern' => option('kirby-extended.locked-pages.slug', 'locked'),
             'method' => 'GET|POST',
             'action' => function () {
+                if (!get('redirect')) {
+                    return false;
+                }
+
                 return new Page([
                     'slug' => option('kirby-extended.locked-pages.slug', 'locked'),
                     'template' => option('kirby-extended.locked-pages.template', 'locked-pages-login'),
