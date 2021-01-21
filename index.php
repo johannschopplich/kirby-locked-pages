@@ -13,11 +13,11 @@ Kirby::plugin('johannschopplich/kirby-locked-pages', [
             if (!empty($result)) return;
             if (!LockedPages::isLocked($result)) return;
 
-            $slug = option('kirby-extended.locked-pages.slug', 'locked');
             $options = [
-                'query' => ['redirect' => $slug]
+                'query' => ['redirect' => $path]
             ];
-            go(url($path, $options));
+            $slug = option('kirby-extended.locked-pages.slug', 'locked');
+            go(url($slug, $options));
         }
     ],
     'routes' => [
