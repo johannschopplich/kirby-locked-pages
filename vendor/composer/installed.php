@@ -6,19 +6,19 @@
     'aliases' => 
     array (
     ),
-    'reference' => 'e0699590558e7dfd55f25a50690679bd2e23b4c6',
+    'reference' => 'f4e33154259e5739ffb73dde1259236182a35fe1',
     'name' => 'johannschopplich/kirby-locked-pages',
   ),
   'versions' => 
   array (
     'getkirby/composer-installer' => 
     array (
-      'pretty_version' => '1.2.0',
-      'version' => '1.2.0.0',
+      'pretty_version' => '1.2.1',
+      'version' => '1.2.1.0',
       'aliases' => 
       array (
       ),
-      'reference' => '240a8b2c275d61b66601feb58222b7d34bc6cf1e',
+      'reference' => 'c98ece30bfba45be7ce457e1102d1b169d922f3d',
     ),
     'johannschopplich/kirby-locked-pages' => 
     array (
@@ -27,7 +27,7 @@
       'aliases' => 
       array (
       ),
-      'reference' => 'e0699590558e7dfd55f25a50690679bd2e23b4c6',
+      'reference' => 'f4e33154259e5739ffb73dde1259236182a35fe1',
     ),
   ),
 );
