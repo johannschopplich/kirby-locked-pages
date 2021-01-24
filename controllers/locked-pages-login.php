@@ -31,7 +31,7 @@ return function ($kirby) {
     $csrfToken = get('csrf');
 
     // Verify token of form
-    if (csrf($csrfToken) === null) {
+    if (csrf($csrfToken) === false) {
         return [
             'error' => option('kirby-extended.locked-pages.error.csrf', 'The CSRF token is invalid')
         ];
