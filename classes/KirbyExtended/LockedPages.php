@@ -8,12 +8,12 @@ class LockedPages
 {
     public static function isLocked(?Page $page): bool
     {
-        if (!$page) {
+        if ($page === null) {
             return false;
         }
 
         $protectedPage = static::find($page);
-        if (!$protectedPage) {
+        if ($protectedPage === null) {
             return false;
         }
 
