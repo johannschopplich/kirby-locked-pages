@@ -52,6 +52,8 @@ sections:
 
 The field group `fields/locked-pages` is registered globally by the plugin.
 
+> ℹ️ Note: The homepage and error page are not lockable. Although it is possible to add the fields, they will have no effect.
+
 ### Templates
 
 You probably want to customize the template which will show the password form. The [template provided](templates/locked-pages-login.php) is suited to be used as-is, but you are welcome to create a `locked-pages-login.php` template inside your `site/templates` folder. The plugin's included template may be used as a starting point.

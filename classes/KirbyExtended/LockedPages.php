@@ -12,7 +12,7 @@ class LockedPages
             return false;
         }
 
-        if ($page->isDraft()) {
+        if ($page->isDraft() || $page->isHomeOrErrorPage()) {
             return false;
         }
 
