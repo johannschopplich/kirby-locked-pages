@@ -15,7 +15,7 @@ Kirby::plugin('johannschopplich/kirby-locked-pages', [
 
             $slug = option('kirby-extended.locked-pages.slug', 'locked');
             $options = [
-                'query' => ['redirect' => $path]
+                'query' => ['redirect' => $result->id()]
             ];
 
             go(url($slug, $options));

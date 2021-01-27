@@ -52,7 +52,7 @@ sections:
 
 The field group `fields/locked-pages` is registered globally by the plugin.
 
-> ℹ️ Note: The homepage and error page are not lockable. Although it is possible to add the fields, they will have no effect.
+> ℹ️ Note: The error page is not lockable. Although it is possible to add the fields, they will have no effect.
 
 ### Templates
 

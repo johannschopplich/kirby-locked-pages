@@ -6,7 +6,7 @@
     'aliases' => 
     array (
     ),
-    'reference' => '79958fc85eeddc008a3b33e206aecbe92b5e37ae',
+    'reference' => '9eaf9d36e8b6bd9ae8daee76e1bb9a3a2ded9d90',
     'name' => 'johannschopplich/kirby-locked-pages',
   ),
   'versions' => 
@@ -27,7 +27,7 @@
       'aliases' => 
       array (
       ),
-      'reference' => '79958fc85eeddc008a3b33e206aecbe92b5e37ae',
+      'reference' => '9eaf9d36e8b6bd9ae8daee76e1bb9a3a2ded9d90',
     ),
   ),
 );
