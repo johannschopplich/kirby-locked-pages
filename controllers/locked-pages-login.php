@@ -13,11 +13,9 @@ return function ($kirby) {
         ];
     }
 
-    $protectedPage = LockedPages::find($targetPage);
-
     // If page or one of its parent isn't locked or the user has entered
     // the password this session already, visit the page immediately
-    if ($protectedPage === null) {
+    if (!LockedPages::isLocked($targetPage)) {
         go($id);
     }
 
@@ -36,6 +34,8 @@ return function ($kirby) {
             'error' => option('kirby-extended.locked-pages.error.csrf', 'The CSRF token is invalid')
         ];
     }
+
+    $protectedPage = LockedPages::find($targetPage);
 
     // Verify entered password
     if ($protectedPage->lockedPagesPassword()->value() !== get('password')) {
