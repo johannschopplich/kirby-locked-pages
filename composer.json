@@ -1,6 +1,6 @@
 {
   "name": "johannschopplich/kirby-locked-pages",
-  "description": "Password-protect pages",
+  "description": "Password-protect pages, Panel blueprint included",
   "type": "kirby-plugin",
   "keywords": [
     "kirby",
@@ -24,17 +24,11 @@
   "require-dev": {
     "getkirby/cms": "^3.0"
   },
-  "config": {
-    "optimize-autoloader": true,
-    "sort-packages": true
-  },
-  "autoload": {
-    "psr-4": {
-      "KirbyExtended\\": "classes/KirbyExtended/"
-    }
-  },
   "scripts": {
     "dist": "composer install --no-dev --optimize-autoloader"
+  },
+  "config": {
+    "optimize-autoloader": true
   },
   "extra": {
     "kirby-cms-path": false

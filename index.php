@@ -1,17 +1,15 @@
 <?php
 
-@include_once __DIR__ . '/vendor/autoload.php';
+load([
+    'KirbyExtended\\LockedPages' => 'classes/KirbyExtended/LockedPages.php'
+], __DIR__);
 
-use Kirby\Cms\App as Kirby;
-use Kirby\Cms\Page;
-use KirbyExtended\LockedPages;
-
-Kirby::plugin('johannschopplich/kirby-locked-pages', [
+\Kirby\Cms\App::plugin('johannschopplich/kirby-locked-pages', [
     'hooks' => [
         'route:after' => function ($route, $path, $method, $result, $final) {
             if (!$final) return;
-            if (!is_a($result, Page::class)) return;
-            if (!LockedPages::isLocked($result)) return;
+            if (!is_a($result, \Kirby\Cms\Page::class)) return;
+            if (!\KirbyExtended\LockedPages::isLocked($result)) return;
 
             $slug = option('kirby-extended.locked-pages.slug', 'locked');
             $options = [
@@ -31,7 +29,7 @@ Kirby::plugin('johannschopplich/kirby-locked-pages', [
                     return false;
                 }
 
-                return new Page([
+                return new \Kirby\Cms\Page([
                     'slug' => option('kirby-extended.locked-pages.slug', 'locked'),
                     'template' => option('kirby-extended.locked-pages.template', 'locked-pages-login'),
                     'content' => [
