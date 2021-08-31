@@ -33,7 +33,9 @@ composer require johannschopplich/kirby-locked-pages
 
 ## Usage
 
-When a locked page is visited, Kirby will redirect to a login form ([virtual page](https://getkirby.com/docs/guide/virtual-pages)), where a password may be entered. Once the user enters the correct password, he will be redirected back to the page URL which was locked before. The session also records that this page is now unlocked for the user. After the session expires, the user has to enter a password again.
+When a locked page is visited, Kirby will redirect to a login form ([virtual page](https://getkirby.com/docs/guide/virtual-pages)), where a password may be entered. Once the user enters the correct password, he will be redirected back to the page URL which was locked before.
+
+The user session also records that this page is now unlocked for further requests. After the session expires, the user has to enter a password again.
 
 ### Configuration
 
@@ -65,7 +67,7 @@ Once you've defined a custom template, Kirby will automatically use the one you'
 
 It is often helpful and good UX to provide the user a way of logging out. You can use a custom [Kirby hook](https://getkirby.com/docs/reference/plugins/extensions/hooks) for this use-case.
 
-Trigger the `locked-pages.logout` hook to clear the locked pages' session data. Once logged out, the user will have to enter the password again to visit the locked page.
+Trigger the `locked-pages.logout` hook to clear the user's plugin session data. Once logged out, he will have to enter the password again.
 
 ```php
 kirby()->trigger('locked-pages.logout');
@@ -97,7 +99,7 @@ return [
             'password' => 'Das Passwort ist nicht korrekt'
         ]
     ]
-]
+];
 ```
 
 ## Credits
