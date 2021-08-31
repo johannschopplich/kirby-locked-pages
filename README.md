@@ -2,9 +2,10 @@
 
 Protect pages that you want to hide from unwanted views with a password.
 
-## Key features
+## Key Features
 
 - 🔒 Easily password-protect single pages
+- 🪝 Custom logout hook
 - 🖼 Panel blueprints included
 
 ## Requirements
@@ -18,7 +19,7 @@ Protect pages that you want to hide from unwanted views with a password.
 
 Download and copy this repository to `/site/plugins/kirby-locked-pages`.
 
-### Git submodule
+### Git Submodule
 
 ```
 git submodule add https://github.com/johannschopplich/kirby-locked-pages.git site/plugins/kirby-locked-pages
@@ -59,6 +60,16 @@ The field group `fields/locked-pages` is registered globally by the plugin.
 You probably want to customize the template which will show the password form. The [template provided](templates/locked-pages-login.php) is suited to be used as-is, but you are welcome to create a `locked-pages-login.php` template inside your `site/templates` folder. The plugin's included template may be used as a starting point.
 
 Once you've defined a custom template, Kirby will automatically use the one you've created rather than the one included by the plugin.
+
+### Logout Hook
+
+It is often helpful and good UX to provide the user a way of logging out. You can use a custom [Kirby hook](https://getkirby.com/docs/reference/plugins/extensions/hooks) for this use-case.
+
+Trigger the `locked-pages.logout` hook to clear the locked pages session data. Once logged out, the user will have to enter the password again to visit the locked page.
+
+```php
+kirby()->trigger('locked-pages.logout');
+```
 
 ## Options
 

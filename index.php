@@ -6,39 +6,10 @@ load([
 
 \Kirby\Cms\App::plugin('johannschopplich/kirby-locked-pages', [
     'hooks' => [
-        'route:after' => function ($route, $path, $method, $result, $final) {
-            if (!$final) return;
-            if (!is_a($result, \Kirby\Cms\Page::class)) return;
-            if (!\KirbyExtended\LockedPages::isLocked($result)) return;
-
-            $slug = option('kirby-extended.locked-pages.slug', 'locked');
-            $options = [
-                'query' => ['redirect' => $result->id()]
-            ];
-
-            go(url($slug, $options));
-        }
+        'route:after' => [\KirbyExtended\LockedPages::class, 'routeHook'],
+        'locked-pages.logout' => [\KirbyExtended\LockedPages::class, 'logoutHook']
     ],
-    'routes' => [
-        [
-            'pattern' => option('kirby-extended.locked-pages.slug', 'locked'),
-            'method' => 'GET|POST',
-            'language' => '*',
-            'action' => function () {
-                if (get('redirect') === null) {
-                    return false;
-                }
-
-                return new \Kirby\Cms\Page([
-                    'slug' => option('kirby-extended.locked-pages.slug', 'locked'),
-                    'template' => option('kirby-extended.locked-pages.template', 'locked-pages-login'),
-                    'content' => [
-                        'title' => option('kirby-extended.locked-pages.title', 'Page locked')
-                    ]
-                ]);
-            }
-        ]
-    ],
+    'routes' => require __DIR__ . '/extensions/routes.php',
     'blueprints' => [
         'fields/locked-pages' => __DIR__ . '/blueprints/fields/locked-pages.yml'
     ],

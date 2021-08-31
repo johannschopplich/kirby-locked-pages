@@ -4,8 +4,10 @@ namespace KirbyExtended;
 
 use Kirby\Cms\Page;
 
-class LockedPages
+final class LockedPages
 {
+    public const SESSION_KEY = 'kirby-extended.locked-pages.access';
+
     public static function isLocked(?Page $page): bool
     {
         if ($page === null) {
@@ -21,7 +23,8 @@ class LockedPages
             return false;
         }
 
-        if (kirby()->session()->get("locked-pages.access.{$protectedPage->id()}", false)) {
+        $access = kirby()->session()->data()->get(LockedPages::SESSION_KEY, []);
+        if (isset($access[$protectedPage->id()])) {
             return false;
         }
 
@@ -39,5 +42,23 @@ class LockedPages
         }
 
         return null;
+    }
+
+    public static function routeHook($route, $path, $method, $result, $final): void {
+        if (!$final) return;
+        if (!is_a($result, \Kirby\Cms\Page::class)) return;
+        if (!\KirbyExtended\LockedPages::isLocked($result)) return;
+
+        $slug = option('kirby-extended.locked-pages.slug', 'locked');
+        $options = [
+            'query' => ['redirect' => $result->id()]
+        ];
+
+        go(url($slug, $options));
+    }
+
+    public static function logoutHook(): void
+    {
+        kirby()->session()->data()->remove(LockedPages::SESSION_KEY);
     }
 }

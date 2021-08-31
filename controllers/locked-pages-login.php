@@ -2,7 +2,7 @@
 
 use KirbyExtended\LockedPages;
 
-return function ($kirby) {
+return function (\Kirby\Cms\App $kirby) {
     $id = get('redirect');
     $targetPage = page($id);
 
@@ -44,8 +44,14 @@ return function ($kirby) {
         ];
     }
 
-    // Redirect future requests immediately for this session
-    $kirby->session()->set("locked-pages.access.{$protectedPage->id()}", true);
+    // Get list of pages where logged in already
+    $access = $kirby->session()->data()->pull(LockedPages::SESSION_KEY, []);
+
+    // Redirect future requests to this page id immediately for this session
+    $access[] = $protectedPage->id();
+
+    // Save access list
+    $kirby->session()->data()->set(LockedPages::SESSION_KEY, $access);
 
     // Finally, visit the page
     go($id);
