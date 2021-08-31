@@ -5,10 +5,7 @@ load([
 ], __DIR__);
 
 \Kirby\Cms\App::plugin('johannschopplich/kirby-locked-pages', [
-    'hooks' => [
-        'route:after' => [\KirbyExtended\LockedPages::class, 'routeHook'],
-        'locked-pages.logout' => [\KirbyExtended\LockedPages::class, 'logoutHook']
-    ],
+    'hooks' => require __DIR__ . '/extensions/hooks.php',
     'routes' => require __DIR__ . '/extensions/routes.php',
     'blueprints' => [
         'fields/locked-pages' => __DIR__ . '/blueprints/fields/locked-pages.yml'

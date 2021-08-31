@@ -43,22 +43,4 @@ final class LockedPages
 
         return null;
     }
-
-    public static function routeHook($route, $path, $method, $result, $final): void {
-        if (!$final) return;
-        if (!is_a($result, \Kirby\Cms\Page::class)) return;
-        if (!\KirbyExtended\LockedPages::isLocked($result)) return;
-
-        $slug = option('kirby-extended.locked-pages.slug', 'locked');
-        $options = [
-            'query' => ['redirect' => $result->id()]
-        ];
-
-        go(url($slug, $options));
-    }
-
-    public static function logoutHook(): void
-    {
-        kirby()->session()->data()->remove(LockedPages::SESSION_KEY);
-    }
 }
