@@ -24,7 +24,7 @@ final class LockedPages
         }
 
         $access = kirby()->session()->data()->get(LockedPages::SESSION_KEY, []);
-        if (isset($access[$protectedPage->id()])) {
+        if (in_array($protectedPage->id(), $access)) {
             return false;
         }
 
