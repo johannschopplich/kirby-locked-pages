@@ -5,7 +5,7 @@
     <div class="field">
       <label class="label">Passwort</label>
       <div class="control">
-        <input class="input" type="password" name="password" value="<?= esc(get('password')) ?>">
+        <input class="input" type="password" name="password" value="<?= esc(get('password') ?? '') ?>">
       </div>
       <?php if ($error): ?>
         <p class="help is-danger"><?= $error ?></p>
