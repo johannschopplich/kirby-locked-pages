@@ -75,7 +75,7 @@ kirby()->trigger('locked-pages.logout');
 
 ## Options
 
-> All options are namespaced under `kirby-extended.locked-pages`.
+> All options are namespaced under `johannschopplich.locked-pages`.
 
 | Option | Default | Description |
 | --- | --- | --- |
@@ -91,7 +91,7 @@ To give an example for your `config.php`:
 
 ```php
 return [
-    'kirby-extended.locked-pages' => [
+    'johannschopplich.locked-pages' => [
         'slug' => 'geschuetzt',
         'title' => 'Geschützte Seite',
         'error' => [
@@ -108,4 +108,4 @@ return [
 
 ## License
 
-[MIT](./LICENSE) License © 2021 [Johann Schopplich](https://github.com/johannschopplich)
+[MIT](./LICENSE) License © 2021-2022 [Johann Schopplich](https://github.com/johannschopplich)

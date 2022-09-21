@@ -1,6 +1,6 @@
 <?php
 
-use KirbyExtended\LockedPages;
+use JohannSchopplich\LockedPages;
 
 return function (\Kirby\Cms\App $kirby) {
     $id = get('redirect');
@@ -31,7 +31,7 @@ return function (\Kirby\Cms\App $kirby) {
     // Verify token of form
     if (csrf($csrfToken) === false) {
         return [
-            'error' => option('kirby-extended.locked-pages.error.csrf', 'The CSRF token is invalid')
+            'error' => option('johannschopplich.locked-pages.error.csrf', 'The CSRF token is invalid')
         ];
     }
 
@@ -40,7 +40,7 @@ return function (\Kirby\Cms\App $kirby) {
     // Verify entered password
     if ($protectedPage->lockedPagesPassword()->value() !== get('password')) {
         return [
-            'error' => option('kirby-extended.locked-pages.error.password', 'The password is incorrect')
+            'error' => option('johannschopplich.locked-pages.error.password', 'The password is incorrect')
         ];
     }
 

@@ -1,12 +1,12 @@
 <?php
 
-namespace KirbyExtended;
+namespace JohannSchopplich;
 
 use Kirby\Cms\Page;
 
 final class LockedPages
 {
-    public const SESSION_KEY = 'kirby-extended.locked-pages.access';
+    public const SESSION_KEY = 'johannschopplich.locked-pages.access';
 
     public static function isLocked(?Page $page): bool
     {

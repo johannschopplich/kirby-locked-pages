@@ -1,7 +1,7 @@
 <?php
 
 load([
-    'KirbyExtended\\LockedPages' => 'classes/KirbyExtended/LockedPages.php'
+    'JohannSchopplich\\LockedPages' => 'LockedPages.php'
 ], __DIR__);
 
 \Kirby\Cms\App::plugin('johannschopplich/kirby-locked-pages', [

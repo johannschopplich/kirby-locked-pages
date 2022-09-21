@@ -1,12 +1,14 @@
 <?php
 
+use JohannSchopplich\LockedPages;
+
 return [
     'route:after' => function ($route, $path, $method, $result, $final) {
         if (!$final) return;
         if (!is_a($result, \Kirby\Cms\Page::class)) return;
-        if (!\KirbyExtended\LockedPages::isLocked($result)) return;
+        if (!LockedPages::isLocked($result)) return;
 
-        $slug = option('kirby-extended.locked-pages.slug', 'locked');
+        $slug = option('johannschopplich.locked-pages.slug', 'locked');
         $options = [
             'query' => ['redirect' => $result->id()]
         ];
@@ -15,7 +17,7 @@ return [
     },
 
     'locked-pages.logout' => function () {
-        $key = \KirbyExtended\LockedPages::SESSION_KEY;
+        $key = LockedPages::SESSION_KEY;
         kirby()->session()->data()->remove($key);
     }
 ];

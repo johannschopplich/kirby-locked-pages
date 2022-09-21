@@ -2,7 +2,7 @@
 
 return [
     [
-        'pattern' => option('kirby-extended.locked-pages.slug', 'locked'),
+        'pattern' => option('johannschopplich.locked-pages.slug', 'locked'),
         'method' => 'GET|POST',
         'language' => '*',
         'action' => function () {
@@ -11,10 +11,10 @@ return [
             }
 
             return new \Kirby\Cms\Page([
-                'slug' => option('kirby-extended.locked-pages.slug', 'locked'),
-                'template' => option('kirby-extended.locked-pages.template', 'locked-pages-login'),
+                'slug' => option('johannschopplich.locked-pages.slug', 'locked'),
+                'template' => option('johannschopplich.locked-pages.template', 'locked-pages-login'),
                 'content' => [
-                    'title' => option('kirby-extended.locked-pages.title', 'Page locked')
+                    'title' => option('johannschopplich.locked-pages.title', 'Page locked')
                 ]
             ]);
         }
