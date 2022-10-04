@@ -80,6 +80,7 @@ kirby()->trigger('locked-pages.logout');
 | Option | Default | Description |
 | --- | --- | --- |
 | `slug` | `locked` | Slug for login form (absolute to the site URL). |
+| `languages` | `false`| Activates the language check before redirect. |
 | `template` | `locked-pages-login` | Optional name of custom template (has to be created manually). |
 | `title` | `Page locked` | Title of the login form. |
 | `error.csrf` | `The CSRF token is invalid` | Error message for invalid CSRF. |
