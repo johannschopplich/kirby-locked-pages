@@ -8,9 +8,9 @@ final class LockedPages
 {
     public const SESSION_KEY = 'johannschopplich.locked-pages.access';
 
-    public static function isLocked(?Page $page): bool
+    public static function isLocked(Page|null $page): bool
     {
-        if ($page === null) {
+        if (!$page) {
             return false;
         }
 
@@ -19,21 +19,21 @@ final class LockedPages
         }
 
         $protectedPage = static::find($page);
-        if ($protectedPage === null) {
+        if (!$protectedPage) {
             return false;
         }
 
         $access = kirby()->session()->data()->get(LockedPages::SESSION_KEY, []);
-        if (in_array($protectedPage->id(), $access)) {
+        if (in_array($protectedPage->uri(), $access)) {
             return false;
         }
 
         return true;
     }
 
-    public static function find(Page $page): ?Page
+    public static function find(Page $page): Page|null
     {
-        if ($page->lockedPagesEnable()->exists() && $page->lockedPagesEnable()->toBool()) {
+        if ($page->lockedPagesEnable()->exists() && $page->lockedPagesEnable()->isTrue()) {
             return $page;
         }
 

@@ -3,8 +3,8 @@
 use JohannSchopplich\LockedPages;
 
 return function (\Kirby\Cms\App $kirby) {
-    $id = get('redirect');
-    $targetPage = page($id);
+    $uri = get('redirect');
+    $targetPage = page($uri);
 
     // Make sure page with given id exists
     if ($targetPage === null) {
@@ -16,7 +16,7 @@ return function (\Kirby\Cms\App $kirby) {
     // If page or one of its parent isn't locked or the user has entered
     // the password this session already, visit the page immediately
     if (!LockedPages::isLocked($targetPage)) {
-        go($id);
+        go($uri);
     }
 
     // Make sure this is a post request
@@ -48,11 +48,11 @@ return function (\Kirby\Cms\App $kirby) {
     $access = $kirby->session()->data()->pull(LockedPages::SESSION_KEY, []);
 
     // Redirect future requests to this page id immediately for this session
-    $access[] = $protectedPage->id();
+    $access[] = $protectedPage->uri();
 
     // Save access list
     $kirby->session()->data()->set(LockedPages::SESSION_KEY, $access);
 
     // Finally, visit the page
-    go($id);
+    go($uri);
 };
