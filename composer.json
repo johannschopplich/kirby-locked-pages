@@ -2,7 +2,7 @@
   "name": "johannschopplich/kirby-locked-pages",
   "description": "Password-protect pages for the Kirby CMS",
   "type": "kirby-plugin",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "keywords": [
     "kirby",
     "password",
