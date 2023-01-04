@@ -10,8 +10,7 @@ Protect pages that you want to hide from unwanted views with a password.
 
 ## Requirements
 
-- Kirby 3
-- PHP 7.4+
+- Kirby 3.7+
 
 ## Installation
 
@@ -108,4 +107,4 @@ return [
 
 ## License
 
-[MIT](./LICENSE) License © 2021-2022 [Johann Schopplich](https://github.com/johannschopplich)
+[MIT](./LICENSE) License © 2021-2023 [Johann Schopplich](https://github.com/johannschopplich)
