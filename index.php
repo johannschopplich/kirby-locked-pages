@@ -4,7 +4,7 @@ load([
     'JohannSchopplich\\LockedPages' => 'LockedPages.php'
 ], __DIR__);
 
-\Kirby\Cms\App::plugin('johannschopplich/kirby-locked-pages', [
+\Kirby\Cms\App::plugin('johannschopplich/locked-pages', [
     'hooks' => require __DIR__ . '/extensions/hooks.php',
     'routes' => require __DIR__ . '/extensions/routes.php',
     'blueprints' => [
