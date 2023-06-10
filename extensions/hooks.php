@@ -17,7 +17,7 @@ return [
         }
 
         $kirby = kirby();
-        $slug = ($kirby->multilang() ? $kirby->language()->code() . '/' : '') . option('johannschopplich.locked-pages.slug', 'locked');
+        $slug = ($kirby->multilang() ? $kirby->language()->url() . '/' : '') . option('johannschopplich.locked-pages.slug', 'locked');
         $options = [
             'query' => ['redirect' => $result->uri()]
         ];
