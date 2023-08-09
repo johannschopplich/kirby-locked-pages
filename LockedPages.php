@@ -2,6 +2,7 @@
 
 namespace JohannSchopplich;
 
+use Kirby\Cms\App;
 use Kirby\Cms\Page;
 
 final class LockedPages
@@ -23,7 +24,7 @@ final class LockedPages
             return false;
         }
 
-        $access = kirby()->session()->data()->get(LockedPages::SESSION_KEY, []);
+        $access = App::instance()->session(['long' => true])->data()->get(LockedPages::SESSION_KEY, []);
         if (in_array($protectedPage->uri(), $access)) {
             return false;
         }

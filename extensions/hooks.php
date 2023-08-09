@@ -1,6 +1,7 @@
 <?php
 
 use JohannSchopplich\LockedPages;
+use Kirby\Cms\App;
 
 return [
     'route:after' => function (\Kirby\Http\Route $route, string $path, string $method, $result, bool $final) {
@@ -16,7 +17,7 @@ return [
             return;
         }
 
-        $kirby = kirby();
+        $kirby = App::instance();
         $slug = ($kirby->multilang() ? $kirby->language()->url() . '/' : '') . option('johannschopplich.locked-pages.slug', 'locked');
         $options = [
             'query' => ['redirect' => $result->uri()]
