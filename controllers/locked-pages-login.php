@@ -47,10 +47,11 @@ return function (\Kirby\Cms\App $kirby) {
     // Get list of pages where logged in already
     $access = $kirby->session()->data()->pull(LockedPages::SESSION_KEY, []);
 
-    // Redirect future requests to this page id immediately for this session
-    $access[] = $protectedPage->uri();
+    // Save page and hashed password
+    $passhash = password_hash(get('password'), PASSWORD_DEFAULT);
+    $access[] = $protectedPage->uri() . '|' . $passhash;
 
-    // Save access list
+    // Save access list 
     $kirby->session()->data()->set(LockedPages::SESSION_KEY, $access);
 
     // Finally, visit the page

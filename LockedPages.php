@@ -23,10 +23,14 @@ final class LockedPages
         if (!$protectedPage) {
             return false;
         }
-
+        
+        // check if Session has URL/password hash
         $access = App::instance()->session(['long' => true])->data()->get(LockedPages::SESSION_KEY, []);
-        if (in_array($protectedPage->uri(), $access)) {
+        foreach($access as $index => $entry) {
+          $urlpass = explode("|", $entry, 2);
+          if ( $urlpass[0] == $protectedPage->uri() && password_verify($protectedPage->lockedPagesPassword()->value(), $urlpass[1]) ) {
             return false;
+          }
         }
 
         return true;
