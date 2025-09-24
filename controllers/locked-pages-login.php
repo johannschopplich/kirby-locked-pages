@@ -6,20 +6,19 @@ return function (\Kirby\Cms\App $kirby) {
     $uri = get('redirect');
     $targetPage = page($uri);
 
-    // Make sure page with given id exists
+    // Ensure target page exists
     if ($targetPage === null) {
         return [
             'error' => false
         ];
     }
 
-    // If page or one of its parent isn't locked or the user has entered
-    // the password this session already, visit the page immediately
+    // If page is not locked or user has access already, just go to the page
     if (!LockedPages::isLocked($targetPage)) {
         go($uri);
     }
 
-    // Make sure this is a post request
+    // Ensure it's a POST request
     if (!$kirby->request()->is('POST')) {
         return [
             'error' => false
@@ -28,7 +27,7 @@ return function (\Kirby\Cms\App $kirby) {
 
     $csrfToken = get('csrf');
 
-    // Verify token of form
+    // Verify the token of the form
     if (csrf($csrfToken) === false) {
         return [
             'error' => option('johannschopplich.locked-pages.error.csrf', 'The CSRF token is invalid')
@@ -45,10 +44,27 @@ return function (\Kirby\Cms\App $kirby) {
     }
 
     // Get list of pages where logged in already
-    $access = $kirby->session()->data()->pull(LockedPages::SESSION_KEY, []);
+    $access = $kirby->session()->data()->get(LockedPages::SESSION_KEY, []);
 
-    // Redirect future requests to this page id immediately for this session
-    $access[] = $protectedPage->uri();
+    // Clean up old format entries and entries for the same URI
+    $access = array_filter($access, function($entry) use ($protectedPage) {
+        // Remove old string format entries
+        if (is_string($entry)) {
+            return false;
+        }
+        // Remove existing entries for the same URI (to update with new password hash)
+        if (is_array($entry) && isset($entry['uri']) && $entry['uri'] === $protectedPage->uri()) {
+            return false;
+        }
+        return true;
+    });
+
+    // Add new access entry with structured data
+    $access[] = [
+        'uri' => $protectedPage->uri(),
+        'password_hash' => password_hash(get('password'), PASSWORD_DEFAULT),
+        'granted_at' => time()
+    ];
 
     // Save access list
     $kirby->session()->data()->set(LockedPages::SESSION_KEY, $access);
