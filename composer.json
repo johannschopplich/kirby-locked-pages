@@ -15,19 +15,18 @@
   "authors": [
     {
       "name": "Johann Schopplich",
-      "email": "pkg@johannschopplich.com",
+      "email": "hello@johannschopplich.com",
       "homepage": "https://johannschopplich.com"
     }
   ],
   "require": {
-    "getkirby/composer-installer": "^1.2"
+    "getkirby/composer-installer": "^1"
   },
   "require-dev": {
-    "friendsofphp/php-cs-fixer": "@stable",
-    "getkirby/cms": "^3.9"
+    "getkirby/cms": "^5"
   },
   "scripts": {
-    "fix": "php-cs-fixer fix",
+    "csfix": "@php tools/phpcs/vendor/bin/php-cs-fixer fix",
     "dist": "composer install --no-dev --optimize-autoloader"
   },
   "config": {
