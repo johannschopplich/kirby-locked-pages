@@ -10,7 +10,7 @@ final class LockedPages
     public const SESSION_KEY = 'johannschopplich.locked-pages.access';
 
     /**
-     * Check if a page or one of its parents is locked and if the user has access
+     * Check if a page is locked and user doesn't have access
      */
     public static function isLocked(Page|null $page): bool
     {
@@ -50,6 +50,9 @@ final class LockedPages
         return true;
     }
 
+    /**
+     * Find the protected page in the page hierarchy
+     */
     public static function find(Page $page): Page|null
     {
         if ($page->lockedPagesEnable()->exists() && $page->lockedPagesEnable()->isTrue()) {
@@ -72,7 +75,7 @@ final class LockedPages
         $access = $session->data()->get(static::SESSION_KEY, []);
 
         // Filter out old string format entries and invalid data
-        $cleanAccess = array_filter($access, function($entry) {
+        $cleanAccess = array_filter($access, function ($entry) {
             return is_array($entry) &&
                    isset($entry['uri'], $entry['password_hash']) &&
                    is_string($entry['uri']) &&
@@ -93,7 +96,7 @@ final class LockedPages
         $session = App::instance()->session(['long' => true]);
         $access = $session->data()->get(static::SESSION_KEY, []);
 
-        $access = array_filter($access, function($entry) use ($uri) {
+        $access = array_filter($access, function ($entry) use ($uri) {
             return !(is_array($entry) && isset($entry['uri']) && $entry['uri'] === $uri);
         });
 

@@ -47,7 +47,7 @@ return function (\Kirby\Cms\App $kirby) {
     $access = $kirby->session()->data()->get(LockedPages::SESSION_KEY, []);
 
     // Clean up old format entries and entries for the same URI
-    $access = array_filter($access, function($entry) use ($protectedPage) {
+    $access = array_filter($access, function ($entry) use ($protectedPage) {
         // Remove old string format entries
         if (is_string($entry)) {
             return false;
