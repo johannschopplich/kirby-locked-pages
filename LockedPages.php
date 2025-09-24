@@ -28,8 +28,12 @@ final class LockedPages
         $access = App::instance()->session(['long' => true])->data()->get(LockedPages::SESSION_KEY, []);
         foreach($access as $index => $entry) {
           $urlpass = explode("|", $entry, 2);
-          if ( $urlpass[0] == $protectedPage->uri() && password_verify($protectedPage->lockedPagesPassword()->value(), $urlpass[1]) ) {
-            return false;
+          if (
+              count($urlpass) === 2 &&
+              $urlpass[0] == $protectedPage->uri() &&
+              password_verify($protectedPage->lockedPagesPassword()->value(), $urlpass[1])
+          ) {
+              return false;
           }
         }
 
