@@ -6,6 +6,7 @@ namespace JohannSchopplich\LockedPages;
 
 use Kirby\Cms\App;
 use Kirby\Cms\Page;
+use Kirby\Filesystem\F;
 use Kirby\Session\Session;
 
 final class Guard
@@ -67,6 +68,34 @@ final class Guard
         }
 
         return null;
+    }
+
+    /**
+     * Resolve the page owning a non-Page route result from its path.
+     *
+     * Content representations (`page.json`, `.xml`, `.rss`, …) resolve to a
+     * `Response` rather than a `Page`, so `route:after` only has the request
+     * path to work with. The language prefix is stripped (empty for the
+     * default language) and the extension removed to recover the page ID;
+     * anything that is not a page returns null and is left untouched.
+     */
+    public static function resolveFromRoutePath(string $path): Page|null
+    {
+        $kirby = App::instance();
+
+        if ($kirby->multilang()) {
+            $prefix = $kirby->language()?->path() ?? '';
+            if ($prefix !== '' && str_starts_with($path, $prefix . '/')) {
+                $path = substr($path, strlen($prefix) + 1);
+            }
+        }
+
+        $extension = F::extension($path);
+        if ($extension === '' || $extension === 'html') {
+            return null;
+        }
+
+        return $kirby->page(substr($path, 0, -(strlen($extension) + 1)));
     }
 
     /**

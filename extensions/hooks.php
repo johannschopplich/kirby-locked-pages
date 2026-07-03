@@ -11,18 +11,18 @@ return [
             return;
         }
 
-        if (!($result instanceof \Kirby\Cms\Page)) {
-            return;
-        }
+        // Representations (`.json`, `.xml`, …) resolve to a Response, not a
+        // Page, so recover the owning page from the path to lock them too
+        $page = $result instanceof \Kirby\Cms\Page ? $result : Guard::resolveFromRoutePath($path);
 
-        if (!Guard::isLocked($result)) {
+        if (!Guard::isLocked($page)) {
             return;
         }
 
         $kirby = App::instance();
         $slug = ($kirby->multilang() ? $kirby->language()->url() . '/' : '') . option('johannschopplich.locked-pages.slug', 'locked');
         $options = [
-            'query' => ['redirect' => $result->uri()]
+            'query' => ['redirect' => $page->uri()]
         ];
 
         go(url($slug, $options));
