@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 return [
     [
         'pattern' => option('johannschopplich.locked-pages.slug', 'locked'),

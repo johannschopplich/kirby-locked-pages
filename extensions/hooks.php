@@ -1,6 +1,8 @@
 <?php
 
-use JohannSchopplich\LockedPages;
+declare(strict_types = 1);
+
+use JohannSchopplich\LockedPages\Guard;
 use Kirby\Cms\App;
 
 return [
@@ -13,7 +15,7 @@ return [
             return;
         }
 
-        if (!LockedPages::isLocked($result)) {
+        if (!Guard::isLocked($result)) {
             return;
         }
 
@@ -28,6 +30,6 @@ return [
 
     'locked-pages.logout' => function () {
         $kirby = App::instance();
-        $kirby->session()->data()->remove(LockedPages::SESSION_KEY);
+        $kirby->session()->data()->remove(Guard::SESSION_KEY);
     }
 ];

@@ -1,11 +1,13 @@
 <?php
 
-namespace JohannSchopplich;
+declare(strict_types = 1);
+
+namespace JohannSchopplich\LockedPages;
 
 use Kirby\Cms\App;
 use Kirby\Cms\Page;
 
-final class LockedPages
+final class Guard
 {
     public const SESSION_KEY = 'johannschopplich.locked-pages.access';
 
@@ -22,13 +24,13 @@ final class LockedPages
             return false;
         }
 
-        $protectedPage = static::find($page);
+        $protectedPage = self::find($page);
         if (!$protectedPage) {
             return false;
         }
 
         // Check if user has valid access to this protected page
-        $access = App::instance()->session(['long' => true])->data()->get(static::SESSION_KEY, []);
+        $access = App::instance()->session(['long' => true])->data()->get(self::SESSION_KEY, []);
         $currentPassword = $protectedPage->lockedPagesPassword()->value();
 
         foreach ($access as $entry) {
@@ -60,7 +62,7 @@ final class LockedPages
         }
 
         if ($parent = $page->parent()) {
-            return static::find($parent);
+            return self::find($parent);
         }
 
         return null;
@@ -72,7 +74,7 @@ final class LockedPages
     public static function cleanupSessionData(): void
     {
         $session = App::instance()->session(['long' => true]);
-        $access = $session->data()->get(static::SESSION_KEY, []);
+        $access = $session->data()->get(self::SESSION_KEY, []);
 
         // Filter out old string format entries and invalid data
         $cleanAccess = array_filter($access, function ($entry) {
@@ -85,7 +87,7 @@ final class LockedPages
         // Re-index array to avoid gaps
         $cleanAccess = array_values($cleanAccess);
 
-        $session->data()->set(static::SESSION_KEY, $cleanAccess);
+        $session->data()->set(self::SESSION_KEY, $cleanAccess);
     }
 
     /**
@@ -94,12 +96,12 @@ final class LockedPages
     public static function revokeAccess(string $uri): void
     {
         $session = App::instance()->session(['long' => true]);
-        $access = $session->data()->get(static::SESSION_KEY, []);
+        $access = $session->data()->get(self::SESSION_KEY, []);
 
         $access = array_filter($access, function ($entry) use ($uri) {
             return !(is_array($entry) && isset($entry['uri']) && $entry['uri'] === $uri);
         });
 
-        $session->data()->set(static::SESSION_KEY, array_values($access));
+        $session->data()->set(self::SESSION_KEY, array_values($access));
     }
 }

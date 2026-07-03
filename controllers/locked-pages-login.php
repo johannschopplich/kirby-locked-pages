@@ -1,6 +1,8 @@
 <?php
 
-use JohannSchopplich\LockedPages;
+declare(strict_types = 1);
+
+use JohannSchopplich\LockedPages\Guard;
 
 return function (\Kirby\Cms\App $kirby) {
     $uri = get('redirect');
@@ -14,7 +16,7 @@ return function (\Kirby\Cms\App $kirby) {
     }
 
     // If page is not locked or user has access already, just go to the page
-    if (!LockedPages::isLocked($targetPage)) {
+    if (!Guard::isLocked($targetPage)) {
         go($uri);
     }
 
@@ -34,7 +36,7 @@ return function (\Kirby\Cms\App $kirby) {
         ];
     }
 
-    $protectedPage = LockedPages::find($targetPage);
+    $protectedPage = Guard::find($targetPage);
 
     // Verify entered password
     if ($protectedPage->lockedPagesPassword()->value() !== get('password')) {
@@ -44,7 +46,7 @@ return function (\Kirby\Cms\App $kirby) {
     }
 
     // Get list of pages where logged in already
-    $access = $kirby->session()->data()->get(LockedPages::SESSION_KEY, []);
+    $access = $kirby->session()->data()->get(Guard::SESSION_KEY, []);
 
     // Clean up old format entries and entries for the same URI
     $access = array_filter($access, function ($entry) use ($protectedPage) {
@@ -67,7 +69,7 @@ return function (\Kirby\Cms\App $kirby) {
     ];
 
     // Save access list
-    $kirby->session()->data()->set(LockedPages::SESSION_KEY, $access);
+    $kirby->session()->data()->set(Guard::SESSION_KEY, $access);
 
     // Finally, visit the page
     go($uri);

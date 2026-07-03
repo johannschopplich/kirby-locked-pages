@@ -1,9 +1,13 @@
 <?php
 
+declare(strict_types = 1);
+
 use Kirby\Cms\App;
 
+@include_once __DIR__ . '/vendor/autoload.php';
+
 load([
-    'JohannSchopplich\\LockedPages' => 'LockedPages.php'
+    'JohannSchopplich\\LockedPages\\Guard' => 'src/Guard.php'
 ], __DIR__);
 
 App::plugin('johannschopplich/locked-pages', [
