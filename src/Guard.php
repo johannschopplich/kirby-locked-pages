@@ -6,13 +6,29 @@ namespace JohannSchopplich\LockedPages;
 
 use Kirby\Cms\App;
 use Kirby\Cms\Page;
+use Kirby\Session\Session;
 
 final class Guard
 {
     public const SESSION_KEY = 'johannschopplich.locked-pages.access';
 
     /**
-     * Check if a page is locked and user doesn't have access
+     * Return the session used to store access grants.
+     *
+     * All grant reads and writes go through this single accessor so the
+     * session scope stays consistent. Defaults to a long (2-week, no idle
+     * timeout) session; set `johannschopplich.locked-pages.longSession`
+     * to false for a normal short session.
+     */
+    public static function session(): Session
+    {
+        return App::instance()->session([
+            'long' => (bool)option('johannschopplich.locked-pages.longSession', true)
+        ]);
+    }
+
+    /**
+     * Check if a page is locked and the current session has no access
      */
     public static function isLocked(Page|null $page): bool
     {
@@ -29,27 +45,12 @@ final class Guard
             return false;
         }
 
-        // Check if user has valid access to this protected page
-        $access = App::instance()->session(['long' => true])->data()->get(self::SESSION_KEY, []);
-        $currentPassword = $protectedPage->lockedPagesPassword()->value();
+        $access = self::session()->data()->get(self::SESSION_KEY, []);
+        $granted = $access[$protectedPage->id()] ?? null;
 
-        foreach ($access as $entry) {
-            // Handle both old format (string) and new format (array) for backward compatibility
-            if (is_string($entry)) {
-                continue;
-            }
-
-            if (
-                is_array($entry) &&
-                isset($entry['uri'], $entry['password_hash']) &&
-                $entry['uri'] === $protectedPage->uri() &&
-                password_verify($currentPassword, $entry['password_hash'])
-            ) {
-                return false;
-            }
-        }
-
-        return true;
+        // A grant stays valid only while it matches the current password, so
+        // changing the password in the Panel revokes every existing grant
+        return !is_string($granted) || !hash_equals($granted, self::passwordHash($protectedPage));
     }
 
     /**
@@ -69,39 +70,28 @@ final class Guard
     }
 
     /**
-     * Clean up session data and remove invalid entries
+     * Grant the current session access to a protected page.
+     *
+     * Grants are keyed by the language-independent page ID, so unlocking a
+     * page applies across all of its translations.
      */
-    public static function cleanupSessionData(): void
+    public static function grant(Page $protectedPage): void
     {
-        $session = App::instance()->session(['long' => true]);
+        $session = self::session();
         $access = $session->data()->get(self::SESSION_KEY, []);
-
-        // Filter out old string format entries and invalid data
-        $cleanAccess = array_filter($access, function ($entry) {
-            return is_array($entry) &&
-                   isset($entry['uri'], $entry['password_hash']) &&
-                   is_string($entry['uri']) &&
-                   is_string($entry['password_hash']);
-        });
-
-        // Re-index array to avoid gaps
-        $cleanAccess = array_values($cleanAccess);
-
-        $session->data()->set(self::SESSION_KEY, $cleanAccess);
+        $access[$protectedPage->id()] = self::passwordHash($protectedPage);
+        $session->data()->set(self::SESSION_KEY, $access);
     }
 
     /**
-     * Revoke access for a specific page URI
+     * Hash a protected page's current password for grant comparison.
+     *
+     * The password is an editor-visible shared secret already stored in
+     * plaintext, and the hash never leaves the server-side session, so a
+     * fast hash is sufficient – bcrypt would only add per-request cost.
      */
-    public static function revokeAccess(string $uri): void
+    private static function passwordHash(Page $protectedPage): string
     {
-        $session = App::instance()->session(['long' => true]);
-        $access = $session->data()->get(self::SESSION_KEY, []);
-
-        $access = array_filter($access, function ($entry) use ($uri) {
-            return !(is_array($entry) && isset($entry['uri']) && $entry['uri'] === $uri);
-        });
-
-        $session->data()->set(self::SESSION_KEY, array_values($access));
+        return hash('sha256', (string)$protectedPage->lockedPagesPassword()->value());
     }
 }

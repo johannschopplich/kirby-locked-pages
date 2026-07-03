@@ -29,7 +29,6 @@ return [
     },
 
     'locked-pages.logout' => function () {
-        $kirby = App::instance();
-        $kirby->session()->data()->remove(Guard::SESSION_KEY);
+        Guard::session()->data()->remove(Guard::SESSION_KEY);
     }
 ];

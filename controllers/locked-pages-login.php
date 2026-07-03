@@ -45,31 +45,8 @@ return function (\Kirby\Cms\App $kirby) {
         ];
     }
 
-    // Get list of pages where logged in already
-    $access = $kirby->session()->data()->get(Guard::SESSION_KEY, []);
-
-    // Clean up old format entries and entries for the same URI
-    $access = array_filter($access, function ($entry) use ($protectedPage) {
-        // Remove old string format entries
-        if (is_string($entry)) {
-            return false;
-        }
-        // Remove existing entries for the same URI (to update with new password hash)
-        if (is_array($entry) && isset($entry['uri']) && $entry['uri'] === $protectedPage->uri()) {
-            return false;
-        }
-        return true;
-    });
-
-    // Add new access entry with structured data
-    $access[] = [
-        'uri' => $protectedPage->uri(),
-        'password_hash' => password_hash(get('password'), PASSWORD_DEFAULT),
-        'granted_at' => time()
-    ];
-
-    // Save access list
-    $kirby->session()->data()->set(Guard::SESSION_KEY, $access);
+    // Grant this session access to the protected page
+    Guard::grant($protectedPage);
 
     // Finally, visit the page
     go($uri);
