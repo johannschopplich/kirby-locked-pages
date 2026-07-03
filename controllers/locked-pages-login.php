@@ -17,7 +17,7 @@ return function (\Kirby\Cms\App $kirby) {
 
     // If page is not locked or user has access already, just go to the page
     if (!Guard::isLocked($targetPage)) {
-        go($uri);
+        go($targetPage->url());
     }
 
     // Ensure it's a POST request
@@ -38,8 +38,9 @@ return function (\Kirby\Cms\App $kirby) {
 
     $protectedPage = Guard::find($targetPage);
 
-    // Verify entered password
-    if ($protectedPage->lockedPagesPassword()->value() !== get('password')) {
+    // Verify entered password (constant-time; an empty stored password fails closed)
+    $stored = (string)$protectedPage->lockedPagesPassword()->value();
+    if ($stored === '' || !hash_equals($stored, (string)get('password'))) {
         return [
             'error' => option('johannschopplich.locked-pages.error.password', 'The password is incorrect')
         ];
@@ -49,5 +50,5 @@ return function (\Kirby\Cms\App $kirby) {
     Guard::grant($protectedPage);
 
     // Finally, visit the page
-    go($uri);
+    go($targetPage->url());
 };
