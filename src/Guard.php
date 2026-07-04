@@ -99,6 +99,19 @@ final class Guard
     }
 
     /**
+     * Verify a submitted password against a protected page's stored password.
+     *
+     * Constant-time comparison; an empty stored password fails closed so a
+     * page that enables protection without setting a password stays locked.
+     */
+    public static function verify(Page $protectedPage, string|null $password): bool
+    {
+        $stored = (string)$protectedPage->lockedPagesPassword()->value();
+
+        return $stored !== '' && hash_equals($stored, (string)$password);
+    }
+
+    /**
      * Grant the current session access to a protected page.
      *
      * Grants are keyed by the language-independent page ID, so unlocking a

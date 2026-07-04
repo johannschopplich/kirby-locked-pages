@@ -39,8 +39,7 @@ return function (\Kirby\Cms\App $kirby) {
     $protectedPage = Guard::find($targetPage);
 
     // Verify entered password (constant-time; an empty stored password fails closed)
-    $stored = (string)$protectedPage->lockedPagesPassword()->value();
-    if ($stored === '' || !hash_equals($stored, (string)get('password'))) {
+    if (!Guard::verify($protectedPage, get('password'))) {
         return [
             'error' => option('johannschopplich.locked-pages.error.password', 'The password is incorrect')
         ];
