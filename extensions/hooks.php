@@ -24,12 +24,12 @@ return [
         }
 
         $kirby = App::instance();
-        $slug = ($kirby->multilang() ? $kirby->language()->url() . '/' : '') . $kirby->option('johannschopplich.locked-pages.slug', 'locked');
+        $loginPath = ($kirby->multilang() ? $kirby->language()->url() . '/' : '') . $kirby->option('johannschopplich.locked-pages.slug', 'locked');
         $options = [
             'query' => ['redirect' => $page->uri()]
         ];
 
-        Response::go(Url::to($slug, $options));
+        Response::go(Url::to($loginPath, $options));
     },
 
     'locked-pages.logout' => function () {

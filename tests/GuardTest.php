@@ -69,20 +69,20 @@ final class GuardTest extends TestCase
 
     #[Test]
     #[DataProvider('passwordCases')]
-    public function verifies_the_password_against_the_stored_secret(string $stored, string|null $submitted, bool $expected): void
+    public function verifies_the_password_against_the_stored_secret(string $storedPassword, string|null $submittedPassword, bool $expected): void
     {
         $app = $this->createApp([
             'site' => [
                 'children' => [
                     [
                         'slug' => 'secret',
-                        'content' => ['lockedPagesEnable' => 'true', 'lockedPagesPassword' => $stored],
+                        'content' => ['lockedPagesEnable' => 'true', 'lockedPagesPassword' => $storedPassword],
                     ],
                 ],
             ],
         ]);
 
-        $this->assertSame($expected, Guard::verify($app->page('secret'), $submitted));
+        $this->assertSame($expected, Guard::verify($app->page('secret'), $submittedPassword));
     }
 
     /** @return array<string, array{0: string, 1: string|null}> */
@@ -162,11 +162,11 @@ final class GuardTest extends TestCase
 
         // A password change in the Panel makes the stored grant hash stale,
         // which must lock the page again for the existing session
-        $changed = $notes->clone([
+        $changedPage = $notes->clone([
             'content' => ['title' => 'Notes', 'lockedPagesEnable' => 'true', 'lockedPagesPassword' => 'changed'],
         ]);
 
-        $this->assertTrue(Guard::isLocked($changed));
+        $this->assertTrue(Guard::isLocked($changedPage));
     }
 
     /** @return array<string, array{0: string, 1: string|null}> */

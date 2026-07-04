@@ -48,12 +48,12 @@ final class Guard
             return false;
         }
 
-        $access = self::session()->data()->get(self::SESSION_KEY, []);
-        $granted = $access[$protectedPage->id()] ?? null;
+        $grants = self::session()->data()->get(self::SESSION_KEY, []);
+        $grant = $grants[$protectedPage->id()] ?? null;
 
         // A grant stays valid only while it matches the current password, so
         // changing the password in the Panel revokes every existing grant
-        return !is_string($granted) || !hash_equals($granted, self::passwordHash($protectedPage));
+        return !is_string($grant) || !hash_equals($grant, self::grantHash($protectedPage));
     }
 
     /**
@@ -106,11 +106,11 @@ final class Guard
      * Constant-time comparison; an empty stored password fails closed so a
      * page that enables protection without setting a password stays locked.
      */
-    public static function verify(Page $protectedPage, string|null $password): bool
+    public static function verify(Page $protectedPage, string|null $submittedPassword): bool
     {
-        $stored = (string)$protectedPage->lockedPagesPassword()->value();
+        $storedPassword = (string)$protectedPage->lockedPagesPassword()->value();
 
-        return $stored !== '' && hash_equals($stored, (string)$password);
+        return $storedPassword !== '' && hash_equals($storedPassword, (string)$submittedPassword);
     }
 
     /**
@@ -122,19 +122,19 @@ final class Guard
     public static function grant(Page $protectedPage): void
     {
         $session = self::session();
-        $access = $session->data()->get(self::SESSION_KEY, []);
-        $access[$protectedPage->id()] = self::passwordHash($protectedPage);
-        $session->data()->set(self::SESSION_KEY, $access);
+        $grants = $session->data()->get(self::SESSION_KEY, []);
+        $grants[$protectedPage->id()] = self::grantHash($protectedPage);
+        $session->data()->set(self::SESSION_KEY, $grants);
     }
 
     /**
-     * Hash a protected page's current password for grant comparison.
+     * Derive the session grant token from a protected page's current password.
      *
      * The password is an editor-visible shared secret already stored in
      * plaintext, and the hash never leaves the server-side session, so a
      * fast hash is sufficient – bcrypt would only add per-request cost.
      */
-    private static function passwordHash(Page $protectedPage): string
+    private static function grantHash(Page $protectedPage): string
     {
         return hash('sha256', (string)$protectedPage->lockedPagesPassword()->value());
     }

@@ -7,8 +7,8 @@ use Kirby\Cms\App;
 use Kirby\Http\Response;
 
 return function (App $kirby) {
-    $uri = $kirby->request()->get('redirect');
-    $targetPage = $kirby->site()->find($uri);
+    $targetUri = $kirby->request()->get('redirect');
+    $targetPage = $kirby->site()->find($targetUri);
 
     // Ensure target page exists
     if ($targetPage === null) {
