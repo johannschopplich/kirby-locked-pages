@@ -1,86 +1,108 @@
+<div align="center">
+  <img src="./.github/favicon.svg" alt="Kirby Locked Pages logo" width="120">
+
 # Kirby Locked Pages
 
-Protect pages that you want to hide from unwanted views with a password.
+Password-protect a page – and its entire subtree – behind a login form, for the Kirby CMS.
 
-## Key Features
+[Features](#features) •
+[Options](#options) •
+[Security Scope](#security-scope)
 
-- 🔒 Easily password-protect single pages
-- 🪝 Custom logout hook
-- 🖼 Panel blueprints included
+</div>
 
-## Requirements
+## When to Use
 
-- Kirby 3.7+
+| I want to…                                       | Use                                     |
+| ------------------------------------------------ | --------------------------------------- |
+| Password-protect a page and its children         | `fields/locked-pages` blueprint group   |
+| Give visitors a logout link                      | `locked-pages.logout` hook              |
+| Restyle the password form                        | `site/templates/locked-pages-login.php` |
+| Check lock state from my own code                | `Guard::isLocked($page)`                |
+| Change the login slug, title, or error messages  | `johannschopplich.locked-pages` options |
 
-## Installation
+## Features
 
-### Composer
+### 🔒 Password Protection
 
-```
-composer require johannschopplich/kirby-locked-pages
-```
-
-### Download
-
-Download and copy this repository to `/site/plugins/kirby-locked-pages`.
-
-## Usage
-
-When a locked page is visited, Kirby will redirect to a login form ([virtual page](https://getkirby.com/docs/guide/virtual-pages)), where a password may be entered. Once the user enters the correct password, he will be redirected back to the page URL which was locked before.
-
-The user session also records that this page is now unlocked for further requests. After the session expires, the user has to enter a password again.
-
-### Configuration
-
-See the list of [available options below](#options).
-
-### Blueprints
-
-Add the protection field group to a page blueprint, which shall be lockable by password:
+Toggle protection on any page through a globally registered blueprint field group. Visitors are redirected to a login form until they enter the correct password, and the grant is then stored in their session.
 
 ```yml
 sections:
   access:
     type: fields
     fields:
-      security: fields/locked-pages
+      protection: fields/locked-pages
 ```
 
-The field group `fields/locked-pages` is registered globally by the plugin.
+The group adds a `lockedPagesEnable` toggle and a `lockedPagesPassword` field. Drafts and the error page are never locked, even when the fields are set.
 
-> ℹ️ Note: The error page is not lockable. Although it is possible to add the fields, they will have no effect.
+### 🌳 Subtree Inheritance
 
-### Templates
+Locking a page locks its whole subtree – you only add the field group at the subtree root. Unlocking the parent grants access to every descendant, keyed by the page's language-independent ID, so one unlock covers all translations. Content representations (`.json`, `.xml`, `.rss`, …) are locked alongside the page.
 
-You probably want to customize the template which will show the password form. The [template provided](templates/locked-pages-login.php) is suited to be used as-is, but you are welcome to create a `locked-pages-login.php` template inside your `site/templates` folder. The plugin's included template may be used as a starting point.
+### 🚪 Logout Hook
 
-Once you've defined a custom template, Kirby will automatically use the one you've created rather than the one included by the plugin.
-
-### Logout Hook
-
-It is often helpful and good UX to provide the user a way of logging out. You can use a custom [Kirby hook](https://getkirby.com/docs/reference/plugins/extensions/hooks) for this use-case.
-
-Trigger the `locked-pages.logout` hook to clear the user's plugin session data. Once logged out, he will have to enter the password again.
+Clear a visitor's grants by triggering the `locked-pages.logout` hook. Wire it to a route, then show a logout link only while the session holds a grant.
 
 ```php
-kirby()->trigger('locked-pages.logout');
+// config.php
+return [
+    'routes' => [
+        [
+            'pattern' => 'logout',
+            'action' => function () {
+                kirby()->trigger('locked-pages.logout');
+                go('/');
+            }
+        ]
+    ]
+];
 ```
+
+```php
+<?php use JohannSchopplich\LockedPages\Guard; ?>
+
+<?php if (kirby()->session()->data()->get(Guard::SESSION_KEY)): ?>
+  <a href="<?= url('logout') ?>">Logout</a>
+<?php endif ?>
+```
+
+### 🎨 Custom Login Template
+
+The plugin ships a self-contained login template. Drop your own `locked-pages-login.php` into `site/templates/` and Kirby uses it automatically – the bundled [template](templates/locked-pages-login.php) is a good starting point.
+
+## Requirements
+
+- Kirby 5
+- PHP 8.3+
+
+## Installation
+
+### Composer (Recommended)
+
+```bash
+composer require johannschopplich/kirby-locked-pages
+```
+
+### Manual Installation
+
+Download and copy this repository to `/site/plugins/kirby-locked-pages`.
 
 ## Options
 
-> All options are namespaced under `johannschopplich.locked-pages`.
+All options are namespaced under `johannschopplich.locked-pages`:
 
-| Option | Default | Description |
-| --- | --- | --- |
-| `slug` | `locked` | Slug for login form (absolute to the site URL). |
-| `template` | `locked-pages-login` | Optional name of custom template (has to be created manually). |
-| `title` | `Page locked` | Title of the login form. |
-| `error.csrf` | `The CSRF token is invalid` | Error message for invalid CSRF. |
-| `error.password` | `The password is incorrect` | Error message for invalid password. |
+| Option           | Default                     | Description                                                                            |
+| ---------------- | --------------------------- | ------------------------------------------------------------------------------------- |
+| `slug`           | `locked`                    | Slug of the login form, relative to the site URL.                                     |
+| `template`       | `locked-pages-login`        | Template name for the login form.                                                     |
+| `title`          | `Page locked`               | Title rendered on the login form.                                                     |
+| `longSession`    | `true`                      | Keep grants in a long (2-week) session with no idle timeout. `false` for a 2-hour one. |
+| `error.password` | `The password is incorrect` | Message shown after a wrong password.                                                 |
+| `error.csrf`     | `The CSRF token is invalid` | Message shown when the CSRF token fails.                                              |
 
-> All of the `error` options have to be wrapped in an array.
-
-To give an example for your `config.php`:
+The `error` messages are nested under an `error` key. Example `config.php`:
 
 ```php
 return [
@@ -88,16 +110,24 @@ return [
         'slug' => 'geschuetzt',
         'title' => 'Geschützte Seite',
         'error' => [
-            'csrf' => 'Der CSRF-Token ist nicht korrekt',
-            'password' => 'Das Passwort ist nicht korrekt'
+            'password' => 'Das Passwort ist nicht korrekt',
+            'csrf' => 'Der CSRF-Token ist nicht korrekt'
         ]
     ]
 ];
 ```
 
+## Security Scope
+
+This plugin gates page rendering – nothing else. Know its limits before relying on it:
+
+- **Files are not protected.** Anything under `/media/pages/...` is served statically by the web server, and the URL hash is not a secret – a locked page's images and downloads stay reachable by direct URL. To gate files, serve them through your own route that checks `Guard::isLocked($page)` before streaming. Kirby's [files firewall cookbook](https://getkirby.com/docs/cookbook/security/files-firewall) covers the approach; adapt it to this plugin's session instead of a Panel login.
+- **Passwords are stored in plaintext** in the page's content file, as an editor-visible shared secret. Treat a locked page as hidden from casual visitors, not as a vault.
+- **Grants last up to two weeks** by default. Shorten them with `longSession => false`, or clear them through the logout hook.
+
 ## Credits
 
-- Inspired by [kirby-securedpages](https://github.com/kerli81/kirby-securedpages)
+Inspired by [kirby-securedpages](https://github.com/kerli81/kirby-securedpages).
 
 ## License
 
