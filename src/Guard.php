@@ -23,8 +23,10 @@ final class Guard
      */
     public static function session(): Session
     {
-        return App::instance()->session([
-            'long' => (bool)option('johannschopplich.locked-pages.longSession', true)
+        $kirby = App::instance();
+
+        return $kirby->session([
+            'long' => (bool)$kirby->option('johannschopplich.locked-pages.longSession', true)
         ]);
     }
 

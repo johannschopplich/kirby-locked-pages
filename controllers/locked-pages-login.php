@@ -3,10 +3,12 @@
 declare(strict_types = 1);
 
 use JohannSchopplich\LockedPages\Guard;
+use Kirby\Cms\App;
+use Kirby\Http\Response;
 
-return function (\Kirby\Cms\App $kirby) {
-    $uri = get('redirect');
-    $targetPage = page($uri);
+return function (App $kirby) {
+    $uri = $kirby->request()->get('redirect');
+    $targetPage = $kirby->site()->find($uri);
 
     // Ensure target page exists
     if ($targetPage === null) {
@@ -17,7 +19,7 @@ return function (\Kirby\Cms\App $kirby) {
 
     // If page is not locked or user has access already, just go to the page
     if (!Guard::isLocked($targetPage)) {
-        go($targetPage->url());
+        Response::go($targetPage->url());
     }
 
     // Ensure it's a POST request
@@ -27,21 +29,19 @@ return function (\Kirby\Cms\App $kirby) {
         ];
     }
 
-    $csrfToken = get('csrf');
-
     // Verify the token of the form
-    if (csrf($csrfToken) === false) {
+    if ($kirby->csrf($kirby->request()->get('csrf')) === false) {
         return [
-            'error' => option('johannschopplich.locked-pages.error.csrf', 'The CSRF token is invalid')
+            'error' => $kirby->option('johannschopplich.locked-pages.error.csrf', 'The CSRF token is invalid')
         ];
     }
 
     $protectedPage = Guard::find($targetPage);
 
     // Verify entered password (constant-time; an empty stored password fails closed)
-    if (!Guard::verify($protectedPage, get('password'))) {
+    if (!Guard::verify($protectedPage, $kirby->request()->get('password'))) {
         return [
-            'error' => option('johannschopplich.locked-pages.error.password', 'The password is incorrect')
+            'error' => $kirby->option('johannschopplich.locked-pages.error.password', 'The password is incorrect')
         ];
     }
 
@@ -49,5 +49,5 @@ return function (\Kirby\Cms\App $kirby) {
     Guard::grant($protectedPage);
 
     // Finally, visit the page
-    go($targetPage->url());
+    Response::go($targetPage->url());
 };
