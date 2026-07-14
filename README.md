@@ -102,7 +102,7 @@ All options are namespaced under `johannschopplich.locked-pages`:
 | `error.password` | `The password is incorrect` | Message shown after a wrong password.                                                 |
 | `error.csrf`     | `The CSRF token is invalid` | Message shown when the CSRF token fails.                                              |
 
-The `error` messages are nested under an `error` key. Example `config.php`:
+Example `config.php`:
 
 ```php
 return [
