@@ -19,7 +19,7 @@ final class GuardTest extends TestCase
         App::destroy();
     }
 
-    private function createApp(array $props = []): App
+    private function app(array $props = []): App
     {
         $base = sys_get_temp_dir() . '/kirby-locked-pages-tests';
         $props['site'] ??= self::SITE;
@@ -71,7 +71,7 @@ final class GuardTest extends TestCase
     #[DataProvider('passwordCases')]
     public function verifies_the_password_against_the_stored_secret(string $storedPassword, string|null $submittedPassword, bool $expected): void
     {
-        $app = $this->createApp([
+        $app = $this->app([
             'site' => [
                 'children' => [
                     [
@@ -99,7 +99,7 @@ final class GuardTest extends TestCase
     #[DataProvider('findCases')]
     public function find_walks_up_to_the_locked_ancestor(string $id, string|null $expected): void
     {
-        $app = $this->createApp();
+        $app = $this->app();
 
         $this->assertSame($expected, Guard::find($app->page($id))?->id());
     }
@@ -119,7 +119,7 @@ final class GuardTest extends TestCase
     #[DataProvider('lockStateCases')]
     public function is_locked_reflects_the_page_lock_state(string $id, bool $expected): void
     {
-        $app = $this->createApp();
+        $app = $this->app();
 
         $this->assertSame($expected, Guard::isLocked($app->page($id)));
     }
@@ -127,7 +127,7 @@ final class GuardTest extends TestCase
     #[Test]
     public function a_draft_is_never_locked(): void
     {
-        $app = $this->createApp();
+        $app = $this->app();
 
         $this->assertFalse(Guard::isLocked($app->site()->draft('wip')));
     }
@@ -135,7 +135,7 @@ final class GuardTest extends TestCase
     #[Test]
     public function a_null_page_is_never_locked(): void
     {
-        $this->createApp();
+        $this->app();
 
         $this->assertFalse(Guard::isLocked(null));
     }
@@ -143,7 +143,7 @@ final class GuardTest extends TestCase
     #[Test]
     public function granting_access_unlocks_the_page_and_its_subtree(): void
     {
-        $app = $this->createApp();
+        $app = $this->app();
 
         Guard::grant($app->page('notes'));
 
@@ -154,7 +154,7 @@ final class GuardTest extends TestCase
     #[Test]
     public function changing_the_password_revokes_an_existing_grant(): void
     {
-        $app = $this->createApp();
+        $app = $this->app();
         $notes = $app->page('notes');
 
         Guard::grant($notes);
@@ -185,7 +185,7 @@ final class GuardTest extends TestCase
     #[DataProvider('routePathCases')]
     public function resolve_from_route_path_recovers_the_owning_page(string $path, string|null $expected): void
     {
-        $this->createApp();
+        $this->app();
 
         $this->assertSame($expected, Guard::resolveFromRoutePath($path)?->id());
     }
@@ -193,7 +193,7 @@ final class GuardTest extends TestCase
     #[Test]
     public function a_locked_representation_is_resolved_and_locked_across_languages(): void
     {
-        $app = $this->createApp([
+        $app = $this->app([
             'languages' => [
                 ['code' => 'en', 'default' => true, 'name' => 'English'],
                 ['code' => 'de', 'name' => 'Deutsch'],
