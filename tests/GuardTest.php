@@ -14,25 +14,6 @@ use PHPUnit\Framework\TestCase;
 #[PreserveGlobalState(false)]
 final class GuardTest extends TestCase
 {
-    protected function tearDown(): void
-    {
-        App::destroy();
-    }
-
-    private function app(array $props = []): App
-    {
-        $base = sys_get_temp_dir() . '/kirby-locked-pages-tests';
-        $props['site'] ??= self::SITE;
-
-        return new App(array_replace_recursive([
-            'roots' => [
-                'index' => $base,
-                'sessions' => $base . '/sessions',
-            ],
-            'urls' => ['index' => 'https://example.com'],
-        ], $props));
-    }
-
     /**
      * A locked `notes` subtree (child `hello` inherits the lock), an open
      * page, plus a locked draft and locked error page to prove the drafts
@@ -54,6 +35,25 @@ final class GuardTest extends TestCase
             ['slug' => 'wip', 'content' => ['title' => 'WIP', 'lockedPagesEnable' => 'true', 'lockedPagesPassword' => 's3cret']],
         ],
     ];
+
+    protected function tearDown(): void
+    {
+        App::destroy();
+    }
+
+    private function app(array $props = []): App
+    {
+        $base = sys_get_temp_dir() . '/kirby-locked-pages-tests';
+        $props['site'] ??= self::SITE;
+
+        return new App(array_replace_recursive([
+            'roots' => [
+                'index' => $base,
+                'sessions' => $base . '/sessions',
+            ],
+            'urls' => ['index' => 'https://example.com'],
+        ], $props));
+    }
 
     /** @return array<string, array{0: string, 1: string|null, 2: bool}> */
     public static function passwordCases(): array
