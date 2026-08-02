@@ -14,7 +14,7 @@ final class Guard
     public const SESSION_KEY = 'johannschopplich.locked-pages.access';
 
     /**
-     * Return the session used to store access grants.
+     * Returns the session that stores access grants.
      *
      * All grant reads and writes go through this single accessor so the
      * session scope stays consistent. Defaults to a long (2-week, no idle
@@ -31,7 +31,7 @@ final class Guard
     }
 
     /**
-     * Check if a page is locked and the current session has no access.
+     * Checks whether a page is locked and the current session holds no grant.
      */
     public static function isLocked(Page|null $page): bool
     {
@@ -57,7 +57,7 @@ final class Guard
     }
 
     /**
-     * Find the protected page in the page hierarchy.
+     * Walks up the page hierarchy to the nearest protected page.
      */
     public static function find(Page $page): Page|null
     {
@@ -73,13 +73,12 @@ final class Guard
     }
 
     /**
-     * Resolve the page owning a non-Page route result from its path.
+     * Resolves the page owning a non-Page route result from its path.
      *
      * Content representations (`page.json`, `.xml`, `.rss`, …) resolve to a
      * `Response` rather than a `Page`, so `route:after` only has the request
-     * path to work with. The language prefix is stripped (empty for the
-     * default language) and the extension removed to recover the page ID;
-     * anything that is not a page returns null and is left untouched.
+     * path to work with. The language prefix is empty for the default
+     * language, so only a non-empty prefix gets stripped.
      */
     public static function resolveFromRoutePath(string $path): Page|null
     {
@@ -101,9 +100,7 @@ final class Guard
     }
 
     /**
-     * Verify a submitted password against a protected page's stored password.
-     *
-     * Constant-time comparison; an empty stored password fails closed so a
+     * Compares in constant time; an empty stored password fails closed so a
      * page that enables protection without setting a password stays locked.
      */
     public static function verify(Page $protectedPage, string|null $submittedPassword): bool
@@ -114,7 +111,7 @@ final class Guard
     }
 
     /**
-     * Grant the current session access to a protected page.
+     * Grants the current session access to a protected page.
      *
      * Grants are keyed by the language-independent page ID, so unlocking a
      * page applies across all of its translations.
@@ -128,7 +125,7 @@ final class Guard
     }
 
     /**
-     * Derive the session grant token from a protected page's current password.
+     * Derives the session grant token from a protected page's current password.
      *
      * The password is an editor-visible shared secret already stored in
      * plaintext, and the hash never leaves the server-side session, so a
