@@ -31,7 +31,7 @@ final class Guard
     }
 
     /**
-     * Check if a page is locked and the current session has no access
+     * Check if a page is locked and the current session has no access.
      */
     public static function isLocked(Page|null $page): bool
     {
@@ -57,7 +57,7 @@ final class Guard
     }
 
     /**
-     * Find the protected page in the page hierarchy
+     * Find the protected page in the page hierarchy.
      */
     public static function find(Page $page): Page|null
     {
