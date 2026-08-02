@@ -77,8 +77,8 @@ final class Guard
      *
      * Content representations (`page.json`, `.xml`, `.rss`, …) resolve to a
      * `Response` rather than a `Page`, so `route:after` only has the request
-     * path to work with. The language prefix is empty for the default
-     * language, so only a non-empty prefix gets stripped.
+     * path to work with. A language's path can be empty (the usual
+     * default-language case), so the prefix is only stripped when there is one.
      */
     public static function resolveFromRoutePath(string $path): Page|null
     {
@@ -100,8 +100,11 @@ final class Guard
     }
 
     /**
-     * Compares in constant time; an empty stored password fails closed so a
-     * page that enables protection without setting a password stays locked.
+     * Compares a submitted password against the page's stored password.
+     *
+     * The comparison is constant-time, and an empty stored password fails
+     * closed so a page that enables protection without setting a password
+     * stays locked.
      */
     public static function verify(Page $protectedPage, string|null $submittedPassword): bool
     {
