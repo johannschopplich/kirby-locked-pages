@@ -161,7 +161,7 @@ final class GuardTest extends TestCase
         $this->assertFalse(Guard::isLocked($notes));
 
         // A password change in the Panel makes the stored grant hash stale,
-        // which must lock the page again for the existing session
+        // which must lock the page again for the existing session.
         $changedPage = $notes->clone([
             'content' => ['title' => 'Notes', 'lockedPagesEnable' => 'true', 'lockedPagesPassword' => 'changed'],
         ]);
@@ -211,11 +211,11 @@ final class GuardTest extends TestCase
             ],
         ]);
 
-        // Default language: no prefix, resolves straight to the page
+        // Default language: no prefix, resolves straight to the page.
         $this->assertSame('secret', Guard::resolveFromRoutePath('secret.json')?->id());
 
         // Non-default language: the `de/` prefix must be stripped, otherwise
-        // the German representation would resolve to null and serve unprotected
+        // the German representation would resolve to null and serve unprotected.
         $app->setCurrentLanguage('de');
         $german = Guard::resolveFromRoutePath('de/secret.json');
 

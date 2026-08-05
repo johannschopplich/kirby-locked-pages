@@ -15,8 +15,8 @@ return [
             return;
         }
 
-        // Representations (`.json`, `.xml`, …) resolve to a Response, not a
-        // Page, so recover the owning page from the path to lock them too
+        // Representations (`.json`, `.xml`, …) resolve to a `Response`, not
+        // a `Page`, so recover the owning page from the path to lock them too.
         $page = $result instanceof Page ? $result : Guard::resolveFromRoutePath($path);
 
         if (!Guard::isLocked($page)) {

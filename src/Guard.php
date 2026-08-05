@@ -52,7 +52,7 @@ final class Guard
         $grant = $grants[$protectedPage->id()] ?? null;
 
         // A grant stays valid only while it matches the current password, so
-        // changing the password in the Panel revokes every existing grant
+        // changing the password in the Panel revokes every existing grant.
         return !is_string($grant) || !hash_equals($grant, self::grantHash($protectedPage));
     }
 

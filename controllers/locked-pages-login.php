@@ -33,7 +33,7 @@ return function (App $kirby) {
     }
 
     // `Guard::isLocked()` already proved a protected ancestor exists,
-    // so `find()` cannot return null here
+    // so `find()` cannot return null here.
     $protectedPage = Guard::find($targetPage);
 
     if (!Guard::verify($protectedPage, $kirby->request()->get('password'))) {
