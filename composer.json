@@ -5,10 +5,9 @@
   "version": "3.0.0",
   "keywords": [
     "kirby",
-    "password",
-    "protect",
-    "secure",
-    "panel"
+    "kirby-cms",
+    "kirby-plugin",
+    "password"
   ],
   "license": "MIT",
   "homepage": "https://github.com/johannschopplich/kirby-locked-pages#readme",
