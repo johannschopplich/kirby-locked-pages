@@ -205,4 +205,67 @@ final class GuardTest extends LockedPagesTestCase
         $this->assertSame('secret', $german?->id());
         $this->assertTrue(Guard::isLocked($german));
     }
+
+    /** @return array<string, array{0: array<string, string>, 1: array<string, string>, 2: string, 3: string}> */
+    public static function translationLockCases(): array
+    {
+        return [
+            'locked in the default language only' => [
+                ['lockedPagesEnable' => 'true', 'lockedPagesPassword' => 'default'],
+                ['lockedPagesEnable' => 'false', 'lockedPagesPassword' => 'translation'],
+                'default',
+                'translation',
+            ],
+            'locked in a translation only' => [
+                ['lockedPagesEnable' => 'false', 'lockedPagesPassword' => 'default'],
+                ['lockedPagesEnable' => 'true', 'lockedPagesPassword' => 'translation'],
+                'translation',
+                'default',
+            ],
+            'locked in both languages' => [
+                ['lockedPagesEnable' => 'true', 'lockedPagesPassword' => 'default'],
+                ['lockedPagesEnable' => 'true', 'lockedPagesPassword' => 'translation'],
+                'default',
+                'translation',
+            ],
+        ];
+    }
+
+    #[Test]
+    #[DataProvider('translationLockCases')]
+    public function locks_every_translation_with_one_password_when_any_language_enables_the_lock(array $defaultContent, array $translationContent, string $password, string $otherPassword): void
+    {
+        $app = $this->app([
+            'languages' => [
+                ['code' => 'en', 'default' => true, 'name' => 'English'],
+                ['code' => 'de', 'name' => 'Deutsch'],
+            ],
+            'site' => [
+                'children' => [
+                    [
+                        'slug' => 'secret',
+                        'translations' => [
+                            ['code' => 'en', 'content' => ['title' => 'Secret', ...$defaultContent]],
+                            // Values saved before the fields became untranslatable.
+                            ['code' => 'de', 'content' => ['title' => 'Geheim', ...$translationContent]],
+                        ],
+                    ],
+                ],
+            ],
+        ]);
+
+        foreach (['en', 'de'] as $code) {
+            $app->setCurrentLanguage($code);
+            $page = $app->page('secret');
+
+            $this->assertTrue(Guard::isLocked($page), "locked in {$code}");
+            $this->assertFalse(Guard::verify($page, $otherPassword), "other password rejected in {$code}");
+            $this->assertTrue(Guard::verify($page, $password), "password accepted in {$code}");
+        }
+
+        Guard::grant($app->page('secret'));
+        $app->setCurrentLanguage('en');
+
+        $this->assertFalse(Guard::isLocked($app->page('secret')));
+    }
 }

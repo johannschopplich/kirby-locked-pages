@@ -2,6 +2,7 @@ type: group
 fields:
   lockedPagesEnable:
     type: toggle
+    translate: false
     label:
       en: Page Protection
       de: Seitensichtbarkeit
@@ -13,6 +14,7 @@ fields:
       en: Password
       de: Passwort
     type: text
+    translate: false
     icon: lock
     required: true
     when:

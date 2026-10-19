@@ -6,6 +6,7 @@ namespace JohannSchopplich\LockedPages;
 
 use Kirby\Cms\App;
 use Kirby\Cms\Page;
+use Kirby\Content\Content;
 use Kirby\Filesystem\F;
 use Kirby\Session\Session;
 
@@ -54,7 +55,7 @@ final class Guard
      */
     public static function find(Page $page): Page|null
     {
-        if ($page->lockedPagesEnable()->toBool()) {
+        if (self::lockingContent($page)) {
             return $page;
         }
 
@@ -101,7 +102,7 @@ final class Guard
      */
     public static function verify(Page $protectedPage, string|null $submittedPassword): bool
     {
-        $storedPassword = (string)$protectedPage->lockedPagesPassword()->value();
+        $storedPassword = self::password($protectedPage);
 
         return $storedPassword !== '' && hash_equals($storedPassword, (string)$submittedPassword);
     }
@@ -134,6 +135,40 @@ final class Guard
      */
     private static function grantHash(Page $protectedPage): string
     {
-        return hash('sha256', (string)$protectedPage->lockedPagesPassword()->value());
+        return hash('sha256', self::password($protectedPage));
+    }
+
+    /**
+     * Reads the password from the language whose content enables protection.
+     */
+    private static function password(Page $protectedPage): string
+    {
+        return (string)self::lockingContent($protectedPage)?->get('lockedPagesPassword')->value();
+    }
+
+    /**
+     * Returns the first language's content that enables protection, the
+     * default language first. A translation's content file can still hold its
+     * own toggle and password from before both fields became untranslatable,
+     * and Kirby prefers them over the default language's. Checking every
+     * language keeps such a page locked in all of them.
+     */
+    private static function lockingContent(Page $page): Content|null
+    {
+        $codes = ['default'];
+        foreach (App::instance()->languages() as $language) {
+            if (!$language->isDefault()) {
+                $codes[] = $language->code();
+            }
+        }
+
+        foreach ($codes as $code) {
+            $content = $page->content($code);
+            if ($content->get('lockedPagesEnable')->toBool()) {
+                return $content;
+            }
+        }
+
+        return null;
     }
 }
