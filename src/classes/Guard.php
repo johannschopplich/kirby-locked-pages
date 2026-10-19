@@ -14,20 +14,13 @@ final class Guard
     public const SESSION_KEY = 'johannschopplich.locked-pages.access';
 
     /**
-     * Returns the session that stores access grants.
-     *
-     * All grant reads and writes go through this single accessor so the
-     * session scope stays consistent. Defaults to a long (2-week, no idle
-     * timeout) session; set `johannschopplich.locked-pages.longSession`
-     * to false for a normal short session.
+     * Returns the session that holds access grants, as a plain read: asking
+     * for a long session here would turn any existing session, including a
+     * Panel login, into a long one.
      */
     public static function session(): Session
     {
-        $kirby = App::instance();
-
-        return $kirby->session([
-            'long' => (bool)$kirby->option('johannschopplich.locked-pages.longSession')
-        ]);
+        return App::instance()->session();
     }
 
     /**
@@ -117,11 +110,16 @@ final class Guard
      * Grants the current session access to a protected page.
      *
      * Grants are keyed by the language-independent page ID, so unlocking a
-     * page applies across all of its translations.
+     * page applies across all of its translations. Unless the `longSession`
+     * option is off, the session becomes a long one (two weeks, no idle
+     * timeout).
      */
     public static function grant(Page $protectedPage): void
     {
-        $session = self::session();
+        $kirby = App::instance();
+        $session = $kirby->session([
+            'long' => (bool)$kirby->option('johannschopplich.locked-pages.longSession')
+        ]);
         $grants = $session->data()->get(self::SESSION_KEY, []);
         $grants[$protectedPage->id()] = self::grantHash($protectedPage);
         $session->data()->set(self::SESSION_KEY, $grants);

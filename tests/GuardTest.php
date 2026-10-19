@@ -98,7 +98,7 @@ final class GuardTest extends LockedPagesTestCase
     }
 
     #[Test]
-    public function granting_access_unlocks_the_page_and_its_subtree(): void
+    public function grant_unlocks_the_page_and_its_subtree(): void
     {
         $app = $this->app();
 
@@ -106,6 +106,32 @@ final class GuardTest extends LockedPagesTestCase
 
         $this->assertFalse(Guard::isLocked($app->page('notes')));
         $this->assertFalse(Guard::isLocked($app->page('notes/hello')));
+    }
+
+    #[Test]
+    public function is_locked_keeps_the_session_lifetime(): void
+    {
+        $app = $this->app();
+        $session = $app->session();
+        $duration = $session->duration();
+        $timeout = $session->timeout();
+
+        Guard::isLocked($app->page('notes'));
+
+        $this->assertSame($duration, $session->duration());
+        $this->assertSame($timeout, $session->timeout());
+    }
+
+    #[Test]
+    public function grant_switches_to_a_long_session(): void
+    {
+        $app = $this->app();
+        $session = $app->session();
+
+        Guard::grant($app->page('notes'));
+
+        $this->assertSame(1209600, $session->duration());
+        $this->assertFalse($session->timeout());
     }
 
     #[Test]
