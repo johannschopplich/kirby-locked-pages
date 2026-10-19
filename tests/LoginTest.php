@@ -6,6 +6,7 @@ use JohannSchopplich\LockedPages\Guard;
 use Kirby\Cms\App;
 use Kirby\Cms\Page;
 use Kirby\Http\Response;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\PreserveGlobalState;
 use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use PHPUnit\Framework\Attributes\Test;
@@ -100,34 +101,45 @@ final class LoginTest extends LockedPagesTestCase
         $this->assertFalse(Guard::isLocked($app->page('notes')));
     }
 
-    #[Test]
-    public function a_wrong_password_renders_the_form_with_an_error(): void
+    /** @return array<string, array{0: string|array<int, string>}> */
+    public static function invalidTargets(): array
     {
-        $app = $this->submit(['password' => 'nope']);
-
-        $html = $app->call('locked', 'POST');
-
-        $this->assertStringContainsString('The password is incorrect', $html);
-        $this->assertTrue(Guard::isLocked($app->page('notes')));
+        return [
+            'unknown page' => ['missing'],
+            'array' => [['notes']],
+        ];
     }
 
     #[Test]
-    public function an_invalid_csrf_token_renders_the_form_with_an_error(): void
+    #[DataProvider('invalidTargets')]
+    public function an_invalid_target_is_not_found(string|array $redirect): void
     {
-        $app = $this->submit(['password' => 's3cret', 'csrf' => 'forged']);
-
-        $html = $app->call('locked', 'POST');
-
-        $this->assertStringContainsString('The CSRF token is invalid', $html);
-        $this->assertTrue(Guard::isLocked($app->page('notes')));
-    }
-
-    #[Test]
-    public function an_unknown_target_is_not_found(): void
-    {
-        $app = $this->app(['request' => ['query' => ['redirect' => 'missing']]]);
+        $app = $this->app(['request' => ['query' => ['redirect' => $redirect]]]);
 
         $this->assertFalse($app->call('locked'));
+    }
+
+    /** @return array<string, array{0: array<string, mixed>, 1: string}> */
+    public static function rejectedSubmissions(): array
+    {
+        return [
+            'wrong password' => [['password' => 'nope'], 'The password is incorrect'],
+            'forged csrf' => [['password' => 's3cret', 'csrf' => 'forged'], 'The CSRF token is invalid'],
+            'password array' => [['password' => ['s3cret']], 'The password is incorrect'],
+            'csrf array' => [['password' => 's3cret', 'csrf' => [self::CSRF_TOKEN]], 'The CSRF token is invalid'],
+        ];
+    }
+
+    #[Test]
+    #[DataProvider('rejectedSubmissions')]
+    public function renders_the_form_with_an_error_for_a_rejected_submission(array $body, string $error): void
+    {
+        $app = $this->submit($body);
+
+        $html = $app->call('locked', 'POST');
+
+        $this->assertStringContainsString($error, $html);
+        $this->assertTrue(Guard::isLocked($app->page('notes')));
     }
 
     #[Test]
