@@ -8,13 +8,20 @@ F::loadClasses([
 ], __DIR__);
 
 App::plugin('johannschopplich/locked-pages', [
+    'options' => [
+        'slug' => 'locked',
+        'template' => 'locked-pages-login',
+        'title' => 'Page locked',
+        'longSession' => true,
+        'error' => [
+            'password' => 'The password is incorrect',
+            'csrf' => 'The CSRF token is invalid'
+        ]
+    ],
     'hooks' => require __DIR__ . '/src/extensions/hooks.php',
     'routes' => require __DIR__ . '/src/extensions/routes.php',
     'blueprints' => [
         'fields/locked-pages' => __DIR__ . '/src/blueprints/fields/locked-pages.yml'
-    ],
-    'controllers' => [
-        'locked-pages-login' => require __DIR__ . '/src/controllers/locked-pages-login.php'
     ],
     'templates' => [
         'locked-pages-login' => __DIR__ . '/src/templates/locked-pages-login.php'

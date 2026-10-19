@@ -3,60 +3,15 @@
 declare(strict_types = 1);
 
 use JohannSchopplich\LockedPages\Guard;
-use Kirby\Cms\App;
-use Kirby\Filesystem\Dir;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\PreserveGlobalState;
 use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use PHPUnit\Framework\Attributes\Test;
-use PHPUnit\Framework\TestCase;
 
 #[RunTestsInSeparateProcesses]
 #[PreserveGlobalState(false)]
-final class GuardTest extends TestCase
+final class GuardTest extends LockedPagesTestCase
 {
-    /**
-     * A locked `notes` subtree (child `hello` inherits the lock), an open
-     * page, plus a locked draft and locked error page to prove the drafts
-     * and error page are never locked regardless of their own settings.
-     */
-    private const SITE = [
-        'children' => [
-            [
-                'slug' => 'notes',
-                'content' => ['title' => 'Notes', 'lockedPagesEnable' => 'true', 'lockedPagesPassword' => 's3cret'],
-                'children' => [
-                    ['slug' => 'hello', 'content' => ['title' => 'Hello']],
-                ],
-            ],
-            ['slug' => 'open', 'content' => ['title' => 'Open']],
-            ['slug' => 'error', 'content' => ['title' => 'Error', 'lockedPagesEnable' => 'true', 'lockedPagesPassword' => 's3cret']],
-        ],
-        'drafts' => [
-            ['slug' => 'wip', 'content' => ['title' => 'WIP', 'lockedPagesEnable' => 'true', 'lockedPagesPassword' => 's3cret']],
-        ],
-    ];
-
-    protected function tearDown(): void
-    {
-        App::destroy();
-        Dir::remove(__DIR__ . '/tmp');
-    }
-
-    private function app(array $props = []): App
-    {
-        $base = __DIR__ . '/tmp';
-        $props['site'] ??= self::SITE;
-
-        return new App(array_replace_recursive([
-            'roots' => [
-                'index' => $base,
-                'sessions' => $base . '/sessions',
-            ],
-            'urls' => ['index' => 'https://example.com'],
-        ], $props));
-    }
-
     /** @return array<string, array{0: string, 1: string|null, 2: bool}> */
     public static function passwordCases(): array
     {

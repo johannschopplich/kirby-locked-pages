@@ -26,7 +26,7 @@ final class Guard
         $kirby = App::instance();
 
         return $kirby->session([
-            'long' => (bool)$kirby->option('johannschopplich.locked-pages.longSession', true)
+            'long' => (bool)$kirby->option('johannschopplich.locked-pages.longSession')
         ]);
     }
 
@@ -61,7 +61,7 @@ final class Guard
      */
     public static function find(Page $page): Page|null
     {
-        if ($page->lockedPagesEnable()->exists() && $page->lockedPagesEnable()->isTrue()) {
+        if ($page->lockedPagesEnable()->toBool()) {
             return $page;
         }
 

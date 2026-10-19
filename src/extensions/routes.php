@@ -1,26 +1,56 @@
 <?php
 
+use JohannSchopplich\LockedPages\Guard;
 use Kirby\Cms\App;
 use Kirby\Cms\Page;
+use Kirby\Http\Response;
 
 return function (App $kirby) {
+    $slug = $kirby->option('johannschopplich.locked-pages.slug');
+
     return [
         [
-            'pattern' => $kirby->option('johannschopplich.locked-pages.slug', 'locked'),
+            'pattern' => $slug,
             'method' => 'GET|POST',
             'language' => '*',
-            'action' => function () use ($kirby) {
-                if ($kirby->request()->get('redirect') === null) {
+            'action' => function () use ($kirby, $slug) {
+                $request = $kirby->request();
+                $targetPage = $kirby->site()->find($request->get('redirect'));
+
+                if ($targetPage === null) {
                     return false;
                 }
 
-                return new Page([
-                    'slug' => $kirby->option('johannschopplich.locked-pages.slug', 'locked'),
-                    'template' => $kirby->option('johannschopplich.locked-pages.template', 'locked-pages-login'),
+                if (!Guard::isLocked($targetPage)) {
+                    return Response::redirect($targetPage->url());
+                }
+
+                $error = false;
+
+                if ($request->is('POST')) {
+                    // `Guard::isLocked()` returned true, so `find()` has a protected page to return.
+                    $protectedPage = Guard::find($targetPage);
+
+                    if ($kirby->csrf($request->get('csrf')) === false) {
+                        $error = $kirby->option('johannschopplich.locked-pages.error.csrf');
+                    } elseif (Guard::verify($protectedPage, $request->get('password'))) {
+                        Guard::grant($protectedPage);
+
+                        return Response::redirect($targetPage->url());
+                    } else {
+                        $error = $kirby->option('johannschopplich.locked-pages.error.password');
+                    }
+                }
+
+                $loginPage = new Page([
+                    'slug' => $slug,
+                    'template' => $kirby->option('johannschopplich.locked-pages.template'),
                     'content' => [
-                        'title' => $kirby->option('johannschopplich.locked-pages.title', 'Page locked')
+                        'title' => $kirby->option('johannschopplich.locked-pages.title')
                     ]
                 ]);
+
+                return $loginPage->render(['error' => $error]);
             }
         ]
     ];
