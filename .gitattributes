@@ -36,7 +36,7 @@
 /mprocs.yaml export-ignore
 /playground/ export-ignore
 /readme/ export-ignore
-# `/templates/` ships: the plugin registers `locked-pages-login` from it
+/templates/ export-ignore
 /tools/ export-ignore
 
 # Quality assurance

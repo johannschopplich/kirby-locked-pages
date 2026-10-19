@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types = 1);
-
 use JohannSchopplich\LockedPages\Guard;
 use Kirby\Cms\App;
 use Kirby\Http\Response;

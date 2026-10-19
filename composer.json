@@ -26,11 +26,6 @@
     "getkirby/cms": "^5",
     "phpunit/phpunit": "^12"
   },
-  "autoload": {
-    "psr-4": {
-      "JohannSchopplich\\LockedPages\\": "src/"
-    }
-  },
   "scripts": {
     "csfix": "@php tools/phpcs/vendor/bin/php-cs-fixer fix",
     "test": "phpunit",
