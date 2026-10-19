@@ -4,6 +4,7 @@ declare(strict_types = 1);
 
 use JohannSchopplich\LockedPages\Guard;
 use Kirby\Cms\App;
+use Kirby\Filesystem\Dir;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\PreserveGlobalState;
 use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
@@ -39,11 +40,12 @@ final class GuardTest extends TestCase
     protected function tearDown(): void
     {
         App::destroy();
+        Dir::remove(__DIR__ . '/tmp');
     }
 
     private function app(array $props = []): App
     {
-        $base = sys_get_temp_dir() . '/kirby-locked-pages-tests';
+        $base = __DIR__ . '/tmp';
         $props['site'] ??= self::SITE;
 
         return new App(array_replace_recursive([
