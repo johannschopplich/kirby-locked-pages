@@ -5,14 +5,20 @@ fields:
     translate: false
     label:
       en: Page Protection
-      de: Seitensichtbarkeit
+      de: Seitenschutz
+      fr: Protection de la page
+      nl: Paginabeveiliging
     text:
       en: Password-protect this page?
       de: Seite mit Passwort schützen?
+      fr: Protéger cette page par un mot de passe ?
+      nl: Deze pagina met een wachtwoord beveiligen?
   lockedPagesPassword:
     label:
       en: Password
       de: Passwort
+      fr: Mot de passe
+      nl: Wachtwoord
     type: text
     translate: false
     icon: lock

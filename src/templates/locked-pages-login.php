@@ -1,5 +1,6 @@
 <?php
 
+use Kirby\Toolkit\I18n;
 use Kirby\Toolkit\Str;
 
 /**
@@ -76,12 +77,12 @@ use Kirby\Toolkit\Str;
       <p class="error"><?= Str::esc($error) ?></p>
     <?php endif ?>
 
-    <label for="password">Password</label>
+    <label for="password"><?= Str::esc(I18n::translate('johannschopplich.locked-pages.password')) ?></label>
     <input type="password" id="password" name="password" autofocus>
 
     <input type="hidden" name="csrf" value="<?= $kirby->csrf() ?>">
 
-    <button type="submit">Open page</button>
+    <button type="submit"><?= Str::esc(I18n::translate('johannschopplich.locked-pages.submit')) ?></button>
   </form>
 
 </body>

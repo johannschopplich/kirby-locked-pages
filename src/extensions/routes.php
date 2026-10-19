@@ -4,16 +4,18 @@ use JohannSchopplich\LockedPages\Guard;
 use Kirby\Cms\App;
 use Kirby\Cms\Page;
 use Kirby\Http\Response;
+use Kirby\Toolkit\I18n;
 
 return function (App $kirby) {
     $slug = $kirby->option('johannschopplich.locked-pages.slug');
+    $text = fn (string $key): string => $kirby->option('johannschopplich.locked-pages.' . $key) ?? I18n::translate('johannschopplich.locked-pages.' . $key);
 
     return [
         [
             'pattern' => $slug,
             'method' => 'GET|POST',
             'language' => '*',
-            'action' => function () use ($kirby, $slug) {
+            'action' => function () use ($kirby, $slug, $text) {
                 $request = $kirby->request();
                 // Query and body values may be arrays (`?redirect[]=…`), so only strings pass.
                 $input = fn (string $key): string|null => is_string($value = $request->get($key)) ? $value : null;
@@ -35,13 +37,13 @@ return function (App $kirby) {
                     $protectedPage = Guard::find($targetPage);
 
                     if ($kirby->csrf($input('csrf')) === false) {
-                        $error = $kirby->option('johannschopplich.locked-pages.error.csrf');
+                        $error = $text('error.csrf');
                     } elseif (Guard::verify($protectedPage, $input('password'))) {
                         Guard::grant($protectedPage);
 
                         return Response::redirect($targetPage->url());
                     } else {
-                        $error = $kirby->option('johannschopplich.locked-pages.error.password');
+                        $error = $text('error.password');
                     }
                 }
 
@@ -49,7 +51,7 @@ return function (App $kirby) {
                     'slug' => $slug,
                     'template' => $kirby->option('johannschopplich.locked-pages.template'),
                     'content' => [
-                        'title' => $kirby->option('johannschopplich.locked-pages.title')
+                        'title' => $text('title')
                     ]
                 ]);
 

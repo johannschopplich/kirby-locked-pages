@@ -78,6 +78,34 @@ final class LoginTest extends LockedPagesTestCase
     }
 
     #[Test]
+    public function renders_the_login_form_in_the_current_language(): void
+    {
+        $app = $this->app([
+            'languages' => [
+                ['code' => 'en', 'default' => true, 'name' => 'English'],
+                ['code' => 'de', 'name' => 'Deutsch', 'url' => '/de'],
+            ],
+            'request' => ['query' => ['redirect' => 'notes']],
+        ]);
+
+        $html = $app->call('de/locked');
+
+        $this->assertStringContainsString('<title>Seite geschützt</title>', $html);
+        $this->assertStringContainsString('Seite öffnen', $html);
+    }
+
+    #[Test]
+    public function the_title_option_overrides_the_translation(): void
+    {
+        $app = $this->app([
+            'options' => ['johannschopplich.locked-pages' => ['title' => 'Members only']],
+            'request' => ['query' => ['redirect' => 'notes']],
+        ]);
+
+        $this->assertStringContainsString('<title>Members only</title>', $app->call('locked'));
+    }
+
+    #[Test]
     public function redirects_to_the_target_once_it_is_unlocked(): void
     {
         $app = $this->app(['request' => ['query' => ['redirect' => 'notes/hello']]]);

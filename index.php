@@ -11,15 +11,11 @@ App::plugin('johannschopplich/locked-pages', [
     'options' => [
         'slug' => 'locked',
         'template' => 'locked-pages-login',
-        'title' => 'Page locked',
-        'longSession' => true,
-        'error' => [
-            'password' => 'The password is incorrect',
-            'csrf' => 'The CSRF token is invalid'
-        ]
+        'longSession' => true
     ],
     'hooks' => require __DIR__ . '/src/extensions/hooks.php',
     'routes' => require __DIR__ . '/src/extensions/routes.php',
+    'translations' => require __DIR__ . '/src/extensions/translations.php',
     'blueprints' => [
         'fields/locked-pages' => __DIR__ . '/src/blueprints/fields/locked-pages.yml'
     ],
