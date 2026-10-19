@@ -33,18 +33,18 @@ abstract class LockedPagesTestCase extends TestCase
     protected function tearDown(): void
     {
         App::destroy();
-        Dir::remove(__DIR__ . '/tmp');
+        Dir::remove(__DIR__ . '/tmp/site');
     }
 
     protected function app(array $props = []): App
     {
-        $base = __DIR__ . '/tmp';
         $props['site'] ??= self::SITE;
 
         return new App(array_replace_recursive([
             'roots' => [
-                'index' => $base,
-                'sessions' => $base . '/sessions',
+                'index' => __DIR__ . '/tmp/site',
+                // Outside the site's root, since Kirby writes the session on shutdown, after `tearDown()` removed it.
+                'sessions' => __DIR__ . '/tmp/sessions',
             ],
             'urls' => ['index' => 'https://example.com'],
         ], $props));
