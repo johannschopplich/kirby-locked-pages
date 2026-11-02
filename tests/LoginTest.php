@@ -42,7 +42,7 @@ final class LoginTest extends LockedPagesTestCase
     }
 
     #[Test]
-    public function redirects_a_locked_page_negotiated_through_the_accept_header(): void
+    public function redirects_a_locked_representation_requested_through_the_accept_header(): void
     {
         $response = $this->app([
             'server' => ['HTTP_ACCEPT' => 'application/json'],
@@ -50,6 +50,38 @@ final class LoginTest extends LockedPagesTestCase
         ])->call('notes');
 
         $this->assertInstanceOf(Response::class, $response);
+        $this->assertSame(302, $response->code());
+    }
+
+    #[Test]
+    public function lets_a_cors_preflight_to_a_locked_page_through(): void
+    {
+        $response = $this->app([
+            'options' => ['cors' => true],
+            'server' => [
+                'HTTP_ORIGIN' => 'https://app.example.com',
+                'HTTP_ACCESS_CONTROL_REQUEST_METHOD' => 'GET',
+            ],
+        ])->call('notes.json', 'OPTIONS');
+
+        $this->assertSame(204, $response->code());
+    }
+
+    #[Test]
+    public function redirects_a_plain_options_request_for_a_locked_page(): void
+    {
+        $response = $this->app()->call('notes', 'OPTIONS');
+
+        $this->assertSame(302, $response->code());
+    }
+
+    #[Test]
+    public function redirects_a_locked_representation_requested_by_extension(): void
+    {
+        $response = $this->app([
+            'templates' => ['default.json' => __DIR__ . '/fixtures/default.json.php'],
+        ])->call('notes.json');
+
         $this->assertSame(302, $response->code());
     }
 

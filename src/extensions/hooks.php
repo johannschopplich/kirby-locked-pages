@@ -9,7 +9,8 @@ use Kirby\Http\Url;
 
 return [
     'route:after' => function (Route $route, string $path, string $method, $result, bool $final) {
-        if (!$final) {
+        // Kirby answers a CORS preflight itself, without content.
+        if (!$final || ($method === 'OPTIONS' && $result instanceof Response)) {
             return;
         }
 

@@ -70,11 +70,12 @@ final class Guard
     /**
      * Resolves the page owning a non-Page route result from its path.
      *
-     * Content representations resolve to a response rather than a `Page`, so
-     * `route:after` only has the request path to work with – with an extension
-     * (`page.json`), or on Kirby 6 without one when the `Accept` header picks
-     * the representation. Without an extension, only a successful `Responder`
-     * is one: a language redirect or a site route on a page's path is not.
+     * A content representation resolves to a response rather than a `Page`,
+     * so `route:after` only has the request path to work with – with an
+     * extension (`page.json`), or on Kirby 6 without one when the `Accept`
+     * header picks the representation. Without an extension, only a
+     * `Responder` that doesn't redirect is one: Kirby's language redirects and
+     * other route results on a page's path are not.
      */
     public static function resolveFromRoute(string $path, mixed $result): Page|null
     {
@@ -94,7 +95,7 @@ final class Guard
 
         if ($extension !== '') {
             $path = substr($path, 0, -(strlen($extension) + 1));
-        } elseif (!$result instanceof Responder || ($result->code() ?? 200) >= 300) {
+        } elseif (!$result instanceof Responder || intdiv($result->code() ?? 200, 100) === 3) {
             return null;
         }
 
