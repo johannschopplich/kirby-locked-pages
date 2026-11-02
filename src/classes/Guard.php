@@ -6,6 +6,7 @@ namespace JohannSchopplich\LockedPages;
 
 use Kirby\Cms\App;
 use Kirby\Cms\Page;
+use Kirby\Cms\Responder;
 use Kirby\Content\Content;
 use Kirby\Filesystem\F;
 use Kirby\Session\Session;
@@ -69,28 +70,35 @@ final class Guard
     /**
      * Resolves the page owning a non-Page route result from its path.
      *
-     * Content representations (`page.json`, `.xml`, `.rss`, …) resolve to a
-     * `Response` rather than a `Page`, so `route:after` only has the request
-     * path to work with. A language's path can be empty (the usual
-     * default-language case), so the prefix is only stripped when there is one.
+     * Content representations resolve to a response rather than a `Page`, so
+     * `route:after` only has the request path to work with – with an extension
+     * (`page.json`), or on Kirby 6 without one when the `Accept` header picks
+     * the representation. Without an extension, only a successful `Responder`
+     * is one: a language redirect or a site route on a page's path is not.
      */
-    public static function resolveFromRoutePath(string $path): Page|null
+    public static function resolveFromRoute(string $path, mixed $result): Page|null
     {
         $kirby = App::instance();
 
         if ($kirby->multilang()) {
             $prefix = $kirby->language()?->path() ?? '';
-            if ($prefix !== '' && str_starts_with($path, $prefix . '/')) {
-                $path = substr($path, strlen($prefix) + 1);
+            if ($path === $prefix || str_starts_with($path, $prefix . '/')) {
+                $path = ltrim(substr($path, strlen($prefix)), '/');
             }
         }
 
         $extension = F::extension($path);
-        if ($extension === '' || $extension === 'html') {
+        if ($extension === 'html') {
             return null;
         }
 
-        return $kirby->page(substr($path, 0, -(strlen($extension) + 1)));
+        if ($extension !== '') {
+            $path = substr($path, 0, -(strlen($extension) + 1));
+        } elseif (!$result instanceof Responder || ($result->code() ?? 200) >= 300) {
+            return null;
+        }
+
+        return $path === '' ? $kirby->site()->homePage() : $kirby->page($path);
     }
 
     /**

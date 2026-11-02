@@ -42,6 +42,18 @@ final class LoginTest extends LockedPagesTestCase
     }
 
     #[Test]
+    public function redirects_a_locked_page_negotiated_through_the_accept_header(): void
+    {
+        $response = $this->app([
+            'server' => ['HTTP_ACCEPT' => 'application/json'],
+            'templates' => ['default.json' => __DIR__ . '/fixtures/default.json.php'],
+        ])->call('notes');
+
+        $this->assertInstanceOf(Response::class, $response);
+        $this->assertSame(302, $response->code());
+    }
+
+    #[Test]
     public function redirects_to_the_login_form_of_the_current_language(): void
     {
         $app = $this->app([

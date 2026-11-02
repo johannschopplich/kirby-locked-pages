@@ -3,6 +3,7 @@
 declare(strict_types = 1);
 
 use JohannSchopplich\LockedPages\Guard;
+use Kirby\Cms\Responder;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\PreserveGlobalState;
 use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
@@ -152,25 +153,36 @@ final class GuardTest extends LockedPagesTestCase
         $this->assertTrue(Guard::isLocked($changedPage));
     }
 
-    /** @return array<string, array{0: string, 1: string|null}> */
-    public static function routePathCases(): array
+    /** @return array<string, array{0: string, 1: int|null, 2: string|null}> */
+    public static function routeCases(): array
     {
         return [
-            'child page representation' => ['notes/hello.json', 'notes/hello'],
-            'root page representation' => ['notes.json', 'notes'],
-            'path without an extension' => ['notes/hello', null],
-            'html is not a representation' => ['notes.html', null],
-            'non-page file' => ['robots.txt', null],
+            'child page representation' => ['notes/hello.json', null, 'notes/hello'],
+            'root page representation' => ['notes.json', null, 'notes'],
+            'negotiated representation' => ['notes/hello', 200, 'notes/hello'],
+            'redirect without an extension' => ['notes/hello', 302, null],
+            'route result without an extension' => ['notes/hello', null, null],
+            'html is not a representation' => ['notes.html', null, null],
+            'non-page file' => ['robots.txt', null, null],
         ];
     }
 
     #[Test]
-    #[DataProvider('routePathCases')]
-    public function resolve_from_route_path_recovers_the_owning_page(string $path, string|null $expected): void
+    #[DataProvider('routeCases')]
+    public function resolve_from_route_recovers_the_owning_page(string $path, int|null $responderCode, string|null $expected): void
     {
         $this->app();
+        $result = $responderCode === null ? null : (new Responder())->code($responderCode);
 
-        $this->assertSame($expected, Guard::resolveFromRoutePath($path)?->id());
+        $this->assertSame($expected, Guard::resolveFromRoute($path, $result)?->id());
+    }
+
+    #[Test]
+    public function resolve_from_route_maps_the_empty_path_to_the_home_page(): void
+    {
+        $this->app(['site' => ['children' => [['slug' => 'home', 'content' => ['title' => 'Home']]]]]);
+
+        $this->assertSame('home', Guard::resolveFromRoute('', new Responder())?->id());
     }
 
     #[Test]
@@ -190,20 +202,30 @@ final class GuardTest extends LockedPagesTestCase
                             ['code' => 'de', 'content' => ['title' => 'Geheim', 'lockedPagesEnable' => 'true', 'lockedPagesPassword' => 's3cret']],
                         ],
                     ],
+                    [
+                        'slug' => 'home',
+                        'translations' => [
+                            ['code' => 'en', 'content' => ['title' => 'Home']],
+                            ['code' => 'de', 'content' => ['title' => 'Start']],
+                        ],
+                    ],
                 ],
             ],
         ]);
 
         // Default language: no prefix, resolves straight to the page.
-        $this->assertSame('secret', Guard::resolveFromRoutePath('secret.json')?->id());
+        $this->assertSame('secret', Guard::resolveFromRoute('secret.json', null)?->id());
 
         // Non-default language: the `de/` prefix must be stripped, otherwise
         // the German representation would resolve to null and serve unprotected.
         $app->setCurrentLanguage('de');
-        $german = Guard::resolveFromRoutePath('de/secret.json');
+        $german = Guard::resolveFromRoute('de/secret.json', null);
 
         $this->assertSame('secret', $german?->id());
         $this->assertTrue(Guard::isLocked($german));
+
+        // The language's own path is its home page.
+        $this->assertSame('home', Guard::resolveFromRoute('de', new Responder())?->id());
     }
 
     /** @return array<string, array{0: array<string, string>, 1: array<string, string>, 2: string, 3: string}> */
