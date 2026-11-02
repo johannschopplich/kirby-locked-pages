@@ -78,7 +78,7 @@ The plugin ships a self-contained login template. Drop your own `locked-pages-lo
 
 ## Requirements
 
-- Kirby 5
+- Kirby 5 or 6
 
 ## Installation
 
