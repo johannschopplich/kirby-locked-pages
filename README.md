@@ -19,7 +19,7 @@ Kirby Locked Pages is a plugin for [Kirby CMS](https://getkirby.com) that passwo
 | Lock a page on a multilingual site              | The toggle in the default language      |
 | Give visitors a logout link                     | `locked-pages.logout` hook              |
 | Restyle the password form                       | `site/templates/locked-pages-login.php` |
-| Check lock state from my own code               | `Guard::isLocked($page)`                |
+| Check lock state from my own code               | `Guard::isLocked()`, `Guard::find()`    |
 | Change the login slug or the form's text        | `johannschopplich.locked-pages` options |
 
 ## Features
@@ -39,7 +39,25 @@ Both fields are untranslatable: on a multilingual site, set them in the default 
 
 ### 🌳 Subtree Inheritance
 
-Locking a page locks its whole subtree – you only add the field group at the subtree root. Unlocking the parent grants access to every descendant, keyed by the page's language-independent ID, so one unlock covers all translations. Changing the password locks the page again for everyone who unlocked it before. Content representations (`.json`, `.xml`, `.rss`, …) are locked alongside the page.
+Locking a page locks its whole subtree – you only add the field group at the subtree root. Unlocking the parent grants access to every descendant without protection of its own, keyed by the page's language-independent ID, so one unlock covers all translations. Changing the password locks the page again for everyone who unlocked it before. Content representations (`.json`, `.xml`, `.rss`, …) are locked alongside the page.
+
+### 🔍 Lock State in Templates
+
+`Guard::isLocked($page)` is `true` while the page or one of its ancestors is protected and the visitor's session has not unlocked the nearest protected one with its current password. Drafts and the error page are never locked. A Panel login does not unlock anything – only the password does. `Guard::find($page)` returns the page whose protection applies – the page itself or its nearest protected ancestor – or `null` when none of them is protected.
+
+To list a locked page in the menu only once the visitor has unlocked it:
+
+```php
+<?php use JohannSchopplich\LockedPages\Guard; ?>
+
+<?php foreach ($site->children()->listed() as $item): ?>
+  <?php if (!Guard::isLocked($item)): ?>
+    <a href="<?= $item->url() ?>"><?= $item->title()->esc() ?></a>
+  <?php endif ?>
+<?php endforeach ?>
+```
+
+To mark every protected page, unlocked or not – with a lock icon, say – check `Guard::find($item) !== null`.
 
 ### 🚪 Logout Hook
 
