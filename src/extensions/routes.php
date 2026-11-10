@@ -8,7 +8,10 @@ use Kirby\Toolkit\I18n;
 
 return function (App $kirby) {
     $slug = $kirby->option('johannschopplich.locked-pages.slug');
-    $text = fn (string $key): string => $kirby->option('johannschopplich.locked-pages.' . $key) ?? I18n::translate('johannschopplich.locked-pages.' . $key);
+    // `$translationKey` maps the `label` options to the flat `password` and `submit` translation keys, which custom templates copied from v3.1.0 or v3.2.0 translate directly.
+    $text = fn (string $key, string|null $translationKey = null): string =>
+        $kirby->option('johannschopplich.locked-pages.' . $key)
+        ?? I18n::translate('johannschopplich.locked-pages.' . ($translationKey ?? $key));
 
     return [
         [
@@ -55,7 +58,11 @@ return function (App $kirby) {
                     ]
                 ]);
 
-                return $loginPage->render(['error' => $error]);
+                return $loginPage->render([
+                    'error' => $error,
+                    'passwordLabel' => $text('label.password', 'password'),
+                    'submitLabel' => $text('label.submit', 'submit')
+                ]);
             }
         ]
     ];

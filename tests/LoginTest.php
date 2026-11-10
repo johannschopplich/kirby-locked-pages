@@ -135,7 +135,20 @@ final class LoginTest extends LockedPagesTestCase
         $html = $app->call('de/locked');
 
         $this->assertStringContainsString('<title>Seite geschützt</title>', $html);
+        $this->assertStringContainsString('<label for="password">Passwort</label>', $html);
         $this->assertStringContainsString('Seite öffnen', $html);
+    }
+
+    #[Test]
+    public function a_custom_template_translates_the_labels_from_their_flat_keys(): void
+    {
+        $app = $this->app([
+            'options' => ['johannschopplich.locked-pages' => ['template' => 'legacy-login']],
+            'templates' => ['legacy-login' => __DIR__ . '/fixtures/legacy-login.php'],
+            'request' => ['query' => ['redirect' => 'notes']],
+        ]);
+
+        $this->assertSame('Password|Open page', $app->call('locked'));
     }
 
     #[Test]
@@ -147,6 +160,20 @@ final class LoginTest extends LockedPagesTestCase
         ]);
 
         $this->assertStringContainsString('<title>Members only</title>', $app->call('locked'));
+    }
+
+    #[Test]
+    public function the_label_options_override_the_translations(): void
+    {
+        $app = $this->app([
+            'options' => ['johannschopplich.locked-pages' => ['label' => ['password' => 'Mot de passe', 'submit' => 'Ouvrir la page']]],
+            'request' => ['query' => ['redirect' => 'notes']],
+        ]);
+
+        $html = $app->call('locked');
+
+        $this->assertStringContainsString('<label for="password">Mot de passe</label>', $html);
+        $this->assertStringContainsString('<button type="submit">Ouvrir la page</button>', $html);
     }
 
     #[Test]

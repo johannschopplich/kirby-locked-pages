@@ -20,7 +20,7 @@ Kirby Locked Pages is a plugin for [Kirby CMS](https://getkirby.com) that passwo
 | Give visitors a logout link                     | `locked-pages.logout` hook              |
 | Restyle the password form                       | `site/templates/locked-pages-login.php` |
 | Check lock state from my own code               | `Guard::isLocked($page)`                |
-| Change the login slug, title, or error messages | `johannschopplich.locked-pages` options |
+| Change the login slug or the form's text        | `johannschopplich.locked-pages` options |
 
 ## Features
 
@@ -70,11 +70,17 @@ return [
 
 ### 🌐 Translated Login Form
 
-The login form speaks English, German, French, and Dutch, and follows the current language of a multilingual site. Other languages fall back to the default language, then to English. The `title` and `error` options replace the translated strings in every language.
+The login form speaks English, German, French, and Dutch, and follows the current language of a multilingual site. Other languages fall back to the default language, then to English. A single-language site always gets English, whatever its `locale` option – set the text options to translate the form. The `title`, `label`, and `error` options replace the translated strings in every language.
 
 ### 🎨 Custom Login Template
 
-The plugin ships a self-contained login template. Drop your own `locked-pages-login.php` into `site/templates/` and Kirby uses it automatically – the bundled [template](src/templates/locked-pages-login.php) is a good starting point. It receives `$error`: the message after a failed attempt, otherwise `false`.
+The plugin ships a self-contained login template. Drop your own `locked-pages-login.php` into `site/templates/` and Kirby uses it automatically – the bundled [template](src/templates/locked-pages-login.php) is a good starting point. It receives:
+
+- `$error`: the message after a failed attempt, otherwise `false`.
+- `$passwordLabel`: the label of the password field, from the `label.password` option or the translation.
+- `$submitLabel`: the label of the submit button, from the `label.submit` option or the translation.
+
+They arrive unescaped – escape them as the bundled template does. A template copied from an earlier release does not print `$passwordLabel` and `$submitLabel`, so the `label` options apply only once it does.
 
 ## Requirements
 
@@ -100,8 +106,10 @@ All options are namespaced under `johannschopplich.locked-pages`:
 | ---------------- | -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
 | `slug`           | `locked`             | Slug of the login form. On a multilingual site, it sits under the language prefix, e.g. `/de/locked`.                                     |
 | `template`       | `locked-pages-login` | Template name for the login form.                                                                                                         |
-| `title`          | –                    | Title of the login form. Replaces the translation, "Page locked" in English.                                                              |
 | `longSession`    | `true`               | Keep grants in a long session: two weeks, no idle timeout. `false` keeps Kirby's normal session: two hours, ending after 30 idle minutes. |
+| `title`          | –                    | Title of the login form. Replaces the translation, "Page locked" in English.                                                              |
+| `label.password` | –                    | Label of the password field. Replaces the translation, "Password" in English.                                                             |
+| `label.submit`   | –                    | Label of the submit button. Replaces the translation, "Open page" in English.                                                             |
 | `error.password` | –                    | Message after a wrong password. Replaces the translation, "The password is incorrect" in English.                                         |
 | `error.csrf`     | –                    | Message when the CSRF token fails. Replaces the translation, "The CSRF token is invalid" in English.                                      |
 
@@ -112,6 +120,10 @@ return [
     'johannschopplich.locked-pages' => [
         'slug' => 'geschuetzt',
         'title' => 'Geschützte Seite',
+        'label' => [
+            'password' => 'Kennwort',
+            'submit' => 'Weiter'
+        ],
         'error' => [
             'password' => 'Das Passwort ist nicht korrekt',
             'csrf' => 'Der CSRF-Token ist nicht korrekt'
