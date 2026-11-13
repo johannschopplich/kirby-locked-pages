@@ -39,7 +39,7 @@ Both fields are untranslatable: on a multilingual site, set them in the default 
 
 ### 🌳 Subtree Inheritance
 
-Locking a page locks its whole subtree – you only add the field group at the subtree root. Unlocking the parent grants access to every descendant without protection of its own, keyed by the page's language-independent ID, so one unlock covers all translations. Changing the password locks the page again for everyone who unlocked it before. Content representations (`.json`, `.xml`, `.rss`, …) are locked alongside the page.
+Locking a page locks its whole subtree – you only add the field group at the subtree root. Unlocking the parent grants access to every descendant without protection of its own, and one unlock covers all translations. Changing the password locks the page again for everyone who unlocked it before. Content representations (`.json`, `.xml`, `.rss`, …) are locked alongside the page.
 
 ### 🔍 Lock State in Templates
 
@@ -90,6 +90,25 @@ return [
 
 The login form speaks English, German, French, and Dutch, and follows the current language of a multilingual site. Other languages fall back to the default language, then to English. A single-language site always gets English, whatever its `locale` option – set the text options to translate the form. The `title`, `label`, and `error` options replace the translated strings in every language.
 
+To add a language, register its five strings through the `translations` extension of a site plugin:
+
+```php
+// site/plugins/locked-pages-translations/index.php
+use Kirby\Cms\App;
+
+App::plugin('my/locked-pages-translations', [
+    'translations' => [
+        'es' => [
+            'johannschopplich.locked-pages.title' => 'Página protegida',
+            'johannschopplich.locked-pages.password' => 'Contraseña',
+            'johannschopplich.locked-pages.submit' => 'Abrir página',
+            'johannschopplich.locked-pages.error.password' => 'La contraseña es incorrecta',
+            'johannschopplich.locked-pages.error.csrf' => 'El token CSRF no es válido'
+        ]
+    ]
+]);
+```
+
 ### 🎨 Custom Login Template
 
 The plugin ships a self-contained login template. Drop your own `locked-pages-login.php` into `site/templates/` and Kirby uses it automatically – the bundled [template](src/templates/locked-pages-login.php) is a good starting point. It receives:
@@ -97,8 +116,11 @@ The plugin ships a self-contained login template. Drop your own `locked-pages-lo
 - `$error`: the message after a failed attempt, otherwise `false`.
 - `$passwordLabel`: the label of the password field, from the `label.password` option or the translation.
 - `$submitLabel`: the label of the submit button, from the `label.submit` option or the translation.
+- `$page`: the login page, not the locked one – its `title()` is the form's title.
 
 They arrive unescaped – escape them as the bundled template does. A template copied from an earlier release does not print `$passwordLabel` and `$submitLabel`, so the `label` options apply only once it does.
+
+The form must send a POST request to the URL it was served from, with a `password` field and a `csrf` field holding `csrf()` – leave `action` off the form, as the bundled template does.
 
 ## Requirements
 
@@ -120,16 +142,16 @@ Download a [release](https://github.com/johannschopplich/kirby-locked-pages/rele
 
 All options are namespaced under `johannschopplich.locked-pages`:
 
-| Option           | Default              | Description                                                                                                                               |
-| ---------------- | -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| `slug`           | `locked`             | Slug of the login form. On a multilingual site, it sits under the language prefix, e.g. `/de/locked`.                                     |
-| `template`       | `locked-pages-login` | Template name for the login form.                                                                                                         |
-| `longSession`    | `true`               | Keep grants in a long session: two weeks, no idle timeout. `false` keeps Kirby's normal session: two hours, ending after 30 idle minutes. |
-| `title`          | –                    | Title of the login form. Replaces the translation, "Page locked" in English.                                                              |
-| `label.password` | –                    | Label of the password field. Replaces the translation, "Password" in English.                                                             |
-| `label.submit`   | –                    | Label of the submit button. Replaces the translation, "Open page" in English.                                                             |
-| `error.password` | –                    | Message after a wrong password. Replaces the translation, "The password is incorrect" in English.                                         |
-| `error.csrf`     | –                    | Message when the CSRF token fails. Replaces the translation, "The CSRF token is invalid" in English.                                      |
+| Option           | Default              | Description                                                                                                                        |
+| ---------------- | -------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `slug`           | `locked`             | Slug of the login form. On a multilingual site, it sits under the language prefix, e.g. `/de/locked`.                              |
+| `template`       | `locked-pages-login` | Template name for the login form.                                                                                                  |
+| `longSession`    | `true`               | Keep grants in a long session: two weeks, no idle timeout. `false` keeps Kirby's normal session, which ends after 30 idle minutes. |
+| `title`          | –                    | Title of the login form. Replaces the translation, "Page locked" in English.                                                       |
+| `label.password` | –                    | Label of the password field. Replaces the translation, "Password" in English.                                                      |
+| `label.submit`   | –                    | Label of the submit button. Replaces the translation, "Open page" in English.                                                      |
+| `error.password` | –                    | Message after a wrong password. Replaces the translation, "The password is incorrect" in English.                                  |
+| `error.csrf`     | –                    | Message when the CSRF token fails. Replaces the translation, "The CSRF token is invalid" in English.                               |
 
 Example `config.php`:
 
@@ -152,10 +174,12 @@ return [
 
 ## Security Scope
 
-This plugin gates page rendering – nothing else. Know its limits before relying on it:
+This plugin gates the page a route returns – nothing else. Know its limits before relying on it:
 
 - **Files are not protected.** Anything under `/media/pages/...` is served statically by the web server, and the URL hash is not a secret – a locked page's images and downloads stay reachable by direct URL. To gate files, serve them through your own route that checks `Guard::isLocked($page)` before streaming. Kirby's [files firewall cookbook](https://getkirby.com/docs/cookbook/security/files-firewall) covers the approach; adapt it to this plugin's session instead of a Panel login.
+- **A route that renders a page itself is not gated.** Return the page object from a custom route instead of `$page->render()`, or check `Guard::isLocked($page)` first.
 - **Passwords are stored in plaintext** in the page's content file, as an editor-visible shared secret. Treat a locked page as hidden from casual visitors, not as a vault.
+- **Password attempts are not limited.** Choose a long password, or rate-limit the form's URL at the web server.
 - **Grants live as long as the session.** Kirby renews the session while the visitor keeps coming back, so with the default long session a grant ends one to two weeks after the last visit. Shorten it with `longSession => false`, or clear grants through the logout hook.
 - **Saving a translation drops its own lock.** Kirby removes untranslatable fields from a translation when it saves one, so a page locked in a translation only becomes public once an editor saves that translation in the Panel. After upgrading from an earlier version, set the toggle and the password in the default language of every page locked in a translation.
 - **The session is shared with the Panel.** Kirby keeps one session per browser, so with `longSession` on, unlocking a page also turns a Panel login in the same browser into a two-week session without idle timeout.
