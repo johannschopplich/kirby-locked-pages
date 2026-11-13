@@ -88,7 +88,7 @@ return [
 
 ### 🌐 Translated Login Form
 
-The login form speaks English, German, French, and Dutch, and follows the current language of a multilingual site. Other languages fall back to the default language, then to English. A single-language site always gets English, whatever its `locale` option – set the text options to translate the form. The `title`, `label`, and `error` options replace the translated strings in every language.
+The login form speaks English, German, French, and Dutch, and follows the current language of a multilingual site. A regional code like `de-at` gets the strings of its base language `de`. Other languages fall back to the default language, then to English. A single-language site always gets English, whatever its `locale` option – set the text options to translate the form. The `title`, `label`, and `error` options replace the translated strings in every language.
 
 To add a language, register its five strings through the `translations` extension of a site plugin:
 
@@ -118,7 +118,7 @@ The plugin ships a self-contained login template. Drop your own `locked-pages-lo
 - `$submitLabel`: the label of the submit button, from the `label.submit` option or the translation.
 - `$page`: the login page, not the locked one – its `title()` is the form's title.
 
-They arrive unescaped – escape them as the bundled template does. A template copied from an earlier release does not print `$passwordLabel` and `$submitLabel`, so the `label` options apply only once it does.
+They arrive unescaped – escape them as the bundled template does. A template copied from an earlier release does not print `$passwordLabel` and `$submitLabel`, so the `label` options and the strings of a base language apply only once it does.
 
 The form must send a POST request to the URL it was served from, with a `password` field and a `csrf` field holding `csrf()` – leave `action` off the form, as the bundled template does.
 

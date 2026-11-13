@@ -9,9 +9,12 @@ use Kirby\Toolkit\I18n;
 return function (App $kirby) {
     $slug = $kirby->option('johannschopplich.locked-pages.slug');
     // `$translationKey` maps the `label` options to the flat `password` and `submit` translation keys, which custom templates copied from v3.1.0 or v3.2.0 translate directly.
-    $text = fn (string $key, string|null $translationKey = null): string =>
-        $kirby->option('johannschopplich.locked-pages.' . $key)
-        ?? I18n::translate('johannschopplich.locked-pages.' . ($translationKey ?? $key));
+    $text = function (string $key, string|null $translationKey = null) use ($kirby): string {
+        $i18nKey = 'johannschopplich.locked-pages.' . ($translationKey ?? $key);
+
+        return $kirby->option('johannschopplich.locked-pages.' . $key)
+            ?? I18n::translate($i18nKey, I18n::translate($i18nKey, null, explode('-', I18n::locale())[0]));
+    };
 
     return [
         [

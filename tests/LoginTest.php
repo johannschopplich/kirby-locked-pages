@@ -140,6 +140,20 @@ final class LoginTest extends LockedPagesTestCase
     }
 
     #[Test]
+    public function renders_the_login_form_for_de_at_in_german(): void
+    {
+        $app = $this->app([
+            'languages' => [
+                ['code' => 'en', 'default' => true, 'name' => 'English'],
+                ['code' => 'de-at', 'name' => 'Deutsch (Österreich)', 'url' => '/de-at'],
+            ],
+            'request' => ['query' => ['redirect' => 'notes']],
+        ]);
+
+        $this->assertStringContainsString('<title>Seite geschützt</title>', $app->call('de-at/locked'));
+    }
+
+    #[Test]
     public function a_custom_template_translates_the_labels_from_their_flat_keys(): void
     {
         $app = $this->app([
