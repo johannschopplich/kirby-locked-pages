@@ -3,7 +3,7 @@
 
 # Kirby Locked Pages
 
-Kirby Locked Pages is a plugin for [Kirby CMS](https://getkirby.com) that password-protects a page and its subpages behind a login form.
+Kirby Locked Pages is a plugin for [Kirby CMS](https://getkirby.com) that password-protects a page, its subpages, and their files behind a login form.
 
 [Features](#features) •
 [Options](#options) •
@@ -13,14 +13,15 @@ Kirby Locked Pages is a plugin for [Kirby CMS](https://getkirby.com) that passwo
 
 ## When to Use
 
-| I want to…                                      | Use                                     |
-| ----------------------------------------------- | --------------------------------------- |
-| Password-protect a page and its children        | `fields/locked-pages` blueprint group   |
-| Lock a page on a multilingual site              | The toggle in the default language      |
-| Give visitors a logout link                     | `locked-pages.logout` hook              |
-| Restyle the password form                       | `site/templates/locked-pages-login.php` |
-| Check lock state from my own code               | `Guard::isLocked()`, `Guard::find()`    |
-| Change the login slug or the form's text        | `johannschopplich.locked-pages` options |
+| I want to…                                        | Use                                      |
+| ------------------------------------------------- | ---------------------------------------- |
+| Password-protect a page and its children          | `fields/locked-pages` blueprint group    |
+| Keep a locked page's images and downloads private | Nothing – files follow their page's lock |
+| Lock a page on a multilingual site                | The toggle in the default language       |
+| Give visitors a logout link                       | `locked-pages.logout` hook               |
+| Restyle the password form                         | `site/templates/locked-pages-login.php`  |
+| Check lock state from my own code                 | `Guard::isLocked()`, `Guard::find()`     |
+| Change the login slug or the form's text          | `johannschopplich.locked-pages` options  |
 
 ## Features
 
@@ -41,9 +42,13 @@ Both fields are untranslatable: on a multilingual site, set them in the default 
 
 Locking a page locks its whole subtree – you only add the field group at the subtree root. Unlocking the parent grants access to every descendant without protection of its own, and one unlock covers all translations. Changing the password locks the page again for everyone who unlocked it before. Content representations (`.json`, `.xml`, `.rss`, …) are locked alongside the page.
 
+### 🖼️ Protected Files
+
+The files of a locked page and its subpages, and their thumbs, reach only visitors who unlocked the page and logged-in users who may read the file. `$file->url()`, `resize()`, `thumb()`, and `srcset()` return URLs under the login slug, such as `/locked/files/notes/…/painting.jpg`, instead of the public `/media/` folder, so templates need no change. Without access, these URLs answer with 404, and Kirby's media URL of a locked file answers with 404 for everyone. Locked files are sent with `Cache-Control: no-store, private`.
+
 ### 🔍 Lock State in Templates
 
-`Guard::isLocked($page)` is `true` while the page or one of its ancestors is protected and the visitor's session has not unlocked the nearest protected one with its current password. Drafts and the error page are never locked. A Panel login does not unlock anything – only the password does. `Guard::find($page)` returns the page whose protection applies – the page itself or its nearest protected ancestor – or `null` when none of them is protected.
+`Guard::isLocked($page)` is `true` while the page or one of its ancestors is protected and the visitor's session has not unlocked the nearest protected one with its current password. Drafts and the error page are never locked. A Panel login does not unlock the page – only the password does. `Guard::find($page)` returns the page whose protection applies – the page itself or its nearest protected ancestor – or `null` when none of them is protected.
 
 To list a locked page in the menu only once the visitor has unlocked it:
 
@@ -142,16 +147,16 @@ Download a [release](https://github.com/johannschopplich/kirby-locked-pages/rele
 
 All options are namespaced under `johannschopplich.locked-pages`:
 
-| Option           | Default              | Description                                                                                                                        |
-| ---------------- | -------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| `slug`           | `locked`             | Slug of the login form. On a multilingual site, it sits under the language prefix, e.g. `/de/locked`.                              |
-| `template`       | `locked-pages-login` | Template name for the login form.                                                                                                  |
-| `longSession`    | `true`               | Keep grants in a long session: two weeks, no idle timeout. `false` keeps Kirby's normal session, which ends after 30 idle minutes. |
-| `title`          | –                    | Title of the login form. Replaces the translation, "Page locked" in English.                                                       |
-| `label.password` | –                    | Label of the password field. Replaces the translation, "Password" in English.                                                      |
-| `label.submit`   | –                    | Label of the submit button. Replaces the translation, "Open page" in English.                                                      |
-| `error.password` | –                    | Message after a wrong password. Replaces the translation, "The password is incorrect" in English.                                  |
-| `error.csrf`     | –                    | Message when the CSRF token fails. Replaces the translation, "The CSRF token is invalid" in English.                               |
+| Option           | Default              | Description                                                                                                                                   |
+| ---------------- | -------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| `slug`           | `locked`             | Slug of the login form and prefix of protected file URLs. On a multilingual site, the form sits under the language prefix, e.g. `/de/locked`. |
+| `template`       | `locked-pages-login` | Template name for the login form.                                                                                                             |
+| `longSession`    | `true`               | Keep grants in a long session: two weeks, no idle timeout. `false` keeps Kirby's normal session, which ends after 30 idle minutes.            |
+| `title`          | –                    | Title of the login form. Replaces the translation, "Page locked" in English.                                                                  |
+| `label.password` | –                    | Label of the password field. Replaces the translation, "Password" in English.                                                                 |
+| `label.submit`   | –                    | Label of the submit button. Replaces the translation, "Open page" in English.                                                                 |
+| `error.password` | –                    | Message after a wrong password. Replaces the translation, "The password is incorrect" in English.                                             |
+| `error.csrf`     | –                    | Message when the CSRF token fails. Replaces the translation, "The CSRF token is invalid" in English.                                          |
 
 Example `config.php`:
 
@@ -174,9 +179,11 @@ return [
 
 ## Security Scope
 
-This plugin gates the page a route returns – nothing else. Know its limits before relying on it:
+This plugin gates the page a route returns and the files of locked pages – nothing else. Know its limits before relying on it:
 
-- **Files are not protected.** Anything under `/media/pages/...` is served statically by the web server, and the URL hash is not a secret – a locked page's images and downloads stay reachable by direct URL. To gate files, serve them through your own route that checks `Guard::isLocked($page)` before streaming. Kirby's [files firewall cookbook](https://getkirby.com/docs/cookbook/security/files-firewall) covers the approach; adapt it to this plugin's session instead of a Panel login.
+- **Thumbs of locked files live in the cache root,** `site/cache/locked-pages/` by default. Kirby's `.htaccess` blocks it like `content/` – on another web server, or with a `cache` root inside the document root, block it yourself.
+- **A lock set outside the Panel leaves earlier media copies public.** Kirby's media folder keeps the files requested while the page was open, until an editor saves the page in the Panel or a template outputs a URL of one of its files. After upgrading from an earlier version, save every locked page in the Panel.
+- **The plugin takes over the `file::url` and `file::version` components.** A plugin that registers them too, such as a CDN or image service plugin, conflicts with it, and the one Kirby loads last wins. If the other one wins, files of locked pages break or bypass the lock, depending on where it serves them from. If this one wins, the other one no longer applies to any file.
 - **A route that renders a page itself is not gated.** Return the page object from a custom route instead of `$page->render()`, or check `Guard::isLocked($page)` first.
 - **Passwords are stored in plaintext** in the page's content file, as an editor-visible shared secret. Treat a locked page as hidden from casual visitors, not as a vault.
 - **Password attempts are not limited.** Choose a long password, or rate-limit the form's URL at the web server.
