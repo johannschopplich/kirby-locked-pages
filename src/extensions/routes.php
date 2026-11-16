@@ -1,5 +1,6 @@
 <?php
 
+use JohannSchopplich\LockedPages\Firewall;
 use JohannSchopplich\LockedPages\Guard;
 use Kirby\Cms\App;
 use Kirby\Cms\Page;
@@ -17,6 +18,10 @@ return function (App $kirby) {
     };
 
     return [
+        [
+            'pattern' => $slug . '/files/(:all)/(:any)/(:any)',
+            'action' => fn (string $pageId, string $hash, string $filename) => Firewall::response($pageId, $hash, $filename)
+        ],
         [
             'pattern' => $slug,
             'method' => 'GET|POST',

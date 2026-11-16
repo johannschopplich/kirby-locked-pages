@@ -4,6 +4,8 @@ use Kirby\Cms\App;
 use Kirby\Filesystem\F;
 
 F::loadClasses([
+    'JohannSchopplich\\LockedPages\\FileStream' => 'src/classes/FileStream.php',
+    'JohannSchopplich\\LockedPages\\Firewall' => 'src/classes/Firewall.php',
     'JohannSchopplich\\LockedPages\\Guard' => 'src/classes/Guard.php'
 ], __DIR__);
 
@@ -13,6 +15,7 @@ App::plugin('johannschopplich/locked-pages', [
         'template' => 'locked-pages-login',
         'longSession' => true
     ],
+    'components' => require __DIR__ . '/src/extensions/components.php',
     'hooks' => require __DIR__ . '/src/extensions/hooks.php',
     'routes' => require __DIR__ . '/src/extensions/routes.php',
     'translations' => require __DIR__ . '/src/extensions/translations.php',

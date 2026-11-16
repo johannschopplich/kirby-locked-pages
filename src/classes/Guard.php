@@ -30,15 +30,7 @@ final class Guard
      */
     public static function isLocked(Page|null $page): bool
     {
-        if (!$page) {
-            return false;
-        }
-
-        if ($page->isDraft() || $page->isErrorPage()) {
-            return false;
-        }
-
-        $protectedPage = self::find($page);
+        $protectedPage = self::lockingPage($page);
         if (!$protectedPage) {
             return false;
         }
@@ -49,6 +41,16 @@ final class Guard
         // A grant stays valid only while it matches the current password, so
         // changing the password in the Panel revokes every existing grant.
         return !is_string($grant) || !hash_equals($grant, self::grantHash($protectedPage));
+    }
+
+    /**
+     * Checks whether a page is locked for anyone without a grant – the page
+     * or an ancestor enables protection, and it is neither a draft nor the
+     * error page.
+     */
+    public static function isProtected(Page|null $page): bool
+    {
+        return self::lockingPage($page) !== null;
     }
 
     /**
@@ -133,6 +135,15 @@ final class Guard
         $grants = $session->data()->get(self::SESSION_KEY, []);
         $grants[$protectedPage->id()] = self::grantHash($protectedPage);
         $session->data()->set(self::SESSION_KEY, $grants);
+    }
+
+    private static function lockingPage(Page|null $page): Page|null
+    {
+        if (!$page || $page->isDraft() || $page->isErrorPage()) {
+            return null;
+        }
+
+        return self::find($page);
     }
 
     /**
