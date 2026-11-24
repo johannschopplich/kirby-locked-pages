@@ -33,5 +33,5 @@ jobs:
       - if: matrix.kirby == '5'
         run: composer install --no-interaction --no-progress
       - if: matrix.kirby == '6'
-        run: composer update getkirby/cms --with "getkirby/cms:^6.0@beta" --with-all-dependencies --no-interaction --no-progress
+        run: composer update getkirby/cms --with "getkirby/cms:^6.0" --with-all-dependencies --no-interaction --no-progress
       - run: vendor/bin/phpunit
