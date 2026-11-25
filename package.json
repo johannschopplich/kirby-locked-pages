@@ -4,10 +4,10 @@
   "private": true,
   "packageManager": "pnpm@12.16.1",
   "scripts": {
-    "release": "bumpp --all --execute \"npx zx scripts/pre-release.mjs\""
+    "release": "bumpp --all --execute \"node scripts/pre-release.mjs\""
   },
   "devDependencies": {
     "bumpp": "^12.3.0",
-    "zx": "^8.8.5"
+    "tinyexec": "^1.3.1"
   }
 }
